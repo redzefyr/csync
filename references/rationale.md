@@ -25,6 +25,19 @@ produced** — not a running commentary on the rule's revisions.
 Mixed together, every decision means reading all three; once that is true for
 long enough, nobody reads any of them.
 
+### The judgment test runs forward
+
+**2026-08-30.** Every rule here was a preservation rule — fold, move, distribute,
+mark "as of then". None permitted overwriting, so information only ever changed
+address, and the one outlet, deleting a closed plan, fires rarely. Meanwhile
+"write **why**" pulled in the route by which a judgment had been reached, and a
+route can always be told at greater length: each cleanup pass found new defects
+and recorded how it had found them, so the passes made the workspace bigger. A
+backward test — "would it be a shame to lose this?" — cannot stop that, because it
+answers yes to every line. Hence a forward test, and hence the explicit boundary
+against folding: folding is the rule that has actually prevented losses, and
+loosening it to make room would have swapped one failure mode for the other.
+
 ### The advanced-date must not rise for non-progress
 
 Fixing a banner, correcting a typo, touching a file during cleanup — if the date
@@ -76,6 +89,15 @@ came out of that: the number is derived from the principle and loses to it, and
 folding means *moving*, not discarding. The gauge went to 400 at the same time,
 because running over costs less than losing something while trimming.
 
+### The gauge covers `GRAPH.md` and `notes/` together
+
+**2026-08-30.** `notes/` was capped at 400 lines; `GRAPH.md`, read in the same
+breath at every session start, was capped at nothing. A limit on one of two files
+that are always read together is not a limit, and the measured sums were 734 and
+544 lines. The 500 is the old 400 plus what a `GRAPH.md` at the structural cap
+costs — stated that way so the next session that moves the number knows what it
+is moving.
+
 ### `docs/` splits live from archive by directory, not by label
 
 When two opposite lifetimes share a directory, a snapshot gets read as the
@@ -115,12 +137,29 @@ Real entries carry emoji-led lines that no schema anticipated. A line a tool
 cannot classify must be displayed, never dropped: dropping raises no error, and
 the reader concludes it was never written.
 
+### `GRAPH.md` gets a structural cap, not a line count
+
+**2026-08-30.** The two indexes measured carried 28 struck-through entries and 155
+date mentions between them — renames, corrected statuses, the whereabouts of
+closed sections, all settling into the index. A line budget spread over the whole
+file would have been met by trimming live entries instead, so the cap is per
+pipeline, which is the unit a reader scans. The present-state rule names the thing
+that was actually growing.
+
 ### Cross-repository pairs are recorded as a description, never a bare slug
 
 On the day five plans were merged into two, five cross-repository references died
 at once. A validation script only ever sees its own repo, so the break is silent;
 a reader can still find the document when a fragment of what it does is written
 next to the name.
+
+### A closed section is folded at session end
+
+**2026-08-30.** "Do not leave finished sections in a plan" was already the rule and
+was already being broken: live plans of 1120, 757 and 680 lines, with headings
+struck through and their bodies still standing underneath. The rule named no
+moment, so no moment checked it. Session end is the moment because the session
+that closed the section is the only one that knows what its one line should say.
 
 ### Closing a plan starts with verifying the code
 
@@ -136,6 +175,24 @@ start here" items. That is why extraction comes before deletion, as its own step
 
 Memory files say "the plan for this is X" and go silently wrong when X is
 deleted. A stale pointer also leaves a finished item looking unfinished.
+
+### Cleanup reports two numbers
+
+**2026-08-30.** "Report what was deleted and what survived" is qualitative, and a
+run that dropped three checklists while adding four traps satisfies it completely
+— which is what had been happening. A count taken before and after cannot be
+satisfied that way. It measures the session-start reading rather than the whole
+workspace because that is the cost these rules exist to hold down; `docs/archive/`
+growing is the system working.
+
+### "Harvest" made cleanup read for material
+
+**2026-08-30.** The step deciding what leaves a finished plan told the session to
+*harvest what would otherwise be recomputed*, and a session told to harvest reads
+looking for things to write. The same four exceptions, stated as exceptions to
+deletion, produce the opposite posture. Seven of cleanup's eight steps produce or
+move text; the one step that decides what goes has to make deletion the default in
+its own wording.
 
 ### Cleanup migrates document formats, and nothing else does
 

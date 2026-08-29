@@ -23,6 +23,44 @@ header from prose.**
 ⚠️ **`rationale.md` is not part of this.** It holds the incidents these rules came
 out of, and it is read **only when a rule is being changed** — never to do work.
 
+## What survives — the grounds, not the route
+
+Every rule below says *where* something goes. This one says whether it is written
+at all.
+
+**Keep the grounds a judgment stands on. Overwrite the route to it.** Grounds are
+what a later session needs in order to keep or overturn the judgment. The route —
+what was tried first, what was searched, which session noticed it, what the text
+said before it was corrected — moves nobody's next step, and unlike grounds it
+has no end: every pass over a document can add another layer.
+
+**The test runs forward, not backward.** "Would it be a shame to lose this?"
+answers yes to everything, which is why it decides nothing. Ask instead **"does
+the next session read this line and do something different?"** No → it is not
+moved somewhere else, it is deleted. This holds for a whole document, for a
+`GRAPH.md` entry, and **for each sentence inside one that is otherwise staying.**
+
+⚠️ **This is not licence to trim.** Folding *moves* a thing to its own home and
+never drops it; the two are told apart by one question — **can you name the
+destination?** If you can, it is folding, and it moves. Overwriting is only for
+text no session needs anywhere. When both readings fit, fold.
+
+## The budget for what every session reads
+
+`GRAPH.md` **and** `notes/` are both read at the start of every session, so the
+limit is on **their sum** — a capped file beside an uncapped one is an uncapped
+read. Each side is held under it by its own section below: `notes/` by its entry
+test, `GRAPH.md` by a structural cap.
+
+**Gauge: 500 lines, `GRAPH.md` + `notes/` together.** Derived, not decreed —
+`notes/`'s own gauge was 400, and a `GRAPH.md` at that structural cap holding a
+handful of pipelines comes to about a hundred. **When the number and the
+principle behind it disagree, the principle wins**; the number may be moved, but
+**write down why that value, here, at the same time.**
+
+⚠️ **Over the gauge, fold — never trim.** Running over costs less than losing
+something while trimming.
+
 ## Reference documents by slug, not by filename
 
 In document bodies, point at other documents with **`[[slug]]`**. Filenames carry
@@ -57,9 +95,7 @@ session that did the work.** Copy `templates/document/plan.md`.
   the first one just built.
   ⚠️ **This is not licence to open more projects in order to get more
   pipelines.**
-- **A session ends by updating that plan's "next step" and its advanced-date.**
-  A stale "next step" is worse than none, because it reads as one that someone
-  checked
+- **A session ends by updating that plan** — the three steps under "Session end"
 
 ### `## findings` — carried over from other work
 
@@ -116,13 +152,10 @@ conditions above are the test.
 > must have in context, whatever it is working on**. Which is exactly why it is
 > **kept small — so no session is made to read a large amount of context.**
 
-The line count below is **a gauge derived from that principle, not a separate
-instruction.** When the number and the principle disagree, **the principle wins.**
-
 Only two things survive:
 
-1. **Decisions that must not be reversed** — write **why** it was decided, not
-   what was decided
+1. **Decisions that must not be reversed** — write **why**: the ground that still
+   holds, not the route that reached it
 2. **Traps that are easy to step on** — prefer the ones that fail silently, the
    ones that raise no exception
 
@@ -130,19 +163,15 @@ Only two things survive:
 wrong?"** Yes → `notes`. No → somewhere else. **"Good to know" fails**, and that
 category is most of the bulk.
 
-**Gauge: 400 lines.** Over it, fold during that session. What overflows usually
-has a home already: the list of plans belongs in `GRAPH.md`, conventions and
-procedures in the project repo's `PROTOCOL.md`/`README.md`, machines and
-environments in memory, build steps in the workspace `CLAUDE.md`, measured
-numbers in `docs/archive/`.
+**The gauge is on `GRAPH.md` + `notes/` together, and it is at the top of this
+file.** Over it, fold during that session. What overflows usually has a home
+already: the list of plans belongs in `GRAPH.md`, conventions and procedures in
+the project repo's `PROTOCOL.md`/`README.md`, machines and environments in
+memory, build steps in the workspace `CLAUDE.md`, measured numbers in
+`docs/archive/`.
 
 ⚠️ **Folding means moving, not discarding.** Deleting a trap or its reasoning to
-hit a number turns this rule into a loss machine — **better to run over than to
-lose something while trimming.**
-
-⚠️ **Do not read the gauge as a user instruction.** It may be adjusted when the
-principle calls for it — **but write down why that value, here, at the same
-time.**
+hit a number turns this rule into a loss machine.
 
 **One flat list of `##` entries per file**, and a decision entry carries its
 reason as a marked paragraph — `document-format.md` has the shape, and
@@ -199,6 +228,15 @@ classified is displayed, never dropped.
 resolve from filenames, so a tool reading paths here would be consulting a second
 authority that nothing keeps in step.
 
+**One pipeline, five to eight lines** — the slug line, status, next step, any
+markers. This is where you decide *which* pipeline to open, and that decision
+does not need the pipeline's contents; what will not fit is plan body.
+
+**A plan entry states the present, and only the present.** A rename, a status
+that was corrected, where a section went when it closed — all of that lives
+inside the plan. An index that also records how it came to say what it says stops
+being scannable, which is the one thing it is for.
+
 **When to update it**: when a document is created or deleted, when a pipeline's
 status changes, and when a session closes. If `GRAPH.md` is wrong, nothing else
 being accurate helps, because it cannot be reached — **never keep the index in two
@@ -234,6 +272,17 @@ where it is not used.
 
 Do not touch it where you found it. **Put it in the other plan's `## findings` and
 leave a marker in `GRAPH.md`.** The pipeline you are running continues unchanged.
+
+## Session end
+
+1. **Update the plan's "next step."** A stale one is worse than none, because it
+   reads as a step someone checked
+2. **Raise the advanced-date** — only if the pipeline actually moved
+3. **Fold every section this session closed into one line each.** A closed
+   section left standing reads as work still on the table, and this is the moment
+   the rule fires; left to "eventually", nothing checks it. ⚠️ **Striking a
+   heading through is not folding** — the heading, the strike and the body all
+   go, and the one-line conclusion stays
 
 ## Closing a pipeline — four steps before deleting
 
@@ -273,6 +322,19 @@ Finally **delete the plan file and leave one line under "closed pipelines" in
 Pruning a workspace so a new session can trust it. There is nothing to run: read
 the files, decide, edit, delete, then `sync`.
 
+**Cleanup is a reduction, and it is measured.** Count the session-start reading
+before you start and again at the end — `wc -l GRAPH.md notes/*.md` — and report
+both numbers. **Ending larger than it started is a failed cleanup**, whatever else
+was tidied, and it is reported as one. "What was deleted and what survived" is
+satisfied by a run that dropped three checklists and added four traps; two
+numbers are not.
+
+⚠️ **A defect found during cleanup is not itself something to write down.** Fix it
+and move on. It earns a `notes/` entry only when **the condition that produced it
+is still standing** — a trap in the original sense, something that fails quietly
+enough to be stepped on again — and that entry says what to avoid, never how this
+session came to find it.
+
 Deletion is safe here — the workspace is a git clone, so anything removed stays in
 `prj/<name>` history. Say so when you report, and give the branch name.
 
@@ -306,8 +368,8 @@ invisibly.
 not if it is mostly done. Check the actual state (grep the code, read the git log)
 rather than trusting what the document claims.
 
-**2. Before deleting a finished plan, harvest what would otherwise be
-recomputed.** In order of how often it bites:
+**2. A finished plan goes with the file. Four things are the exception — take
+those out first.** In order of how often the loss bites:
 
 - **Unstarted follow-ups buried in a finished plan.** The commonest loss
 - **Why an option was rejected.** Without it the next session re-derives the same
@@ -316,8 +378,9 @@ recomputed.** In order of how often it bites:
 - **Traps that cost real time** — silent failure modes, dead code that looked like
   defence
 
-Drop the rest: task checklists, status tables, step-by-step records of work that
-shipped.
+**Everything else goes with the file** — task checklists, status tables,
+step-by-step records of work that shipped, and the account of how any of the four
+above came to be known.
 
 **3. Distribute, then delete — and record the closure in `GRAPH.md`.** Follow the
 four steps and the distribution table above. **The index lives in one place only.**
@@ -334,14 +397,15 @@ filenames.
 them, because they encode assumptions the conventions have since changed. Check
 each one against its own `revise_when`. `docs/archive/` is not touched.
 
-**7. Notes — hold the principle (in context every session). Gauge 400 lines.**
-Only **decisions that must not be reversed** and **traps that are easy to step on**
-survive. Over the gauge, move things to their real homes. Session notes recording
-only what happened get discarded; anything recording a trap does not.
+**7. Notes — hold the principle (in context every session).** Only **decisions
+that must not be reversed** and **traps that are easy to step on** survive. Over
+the budget, move things to their real homes. Session notes recording only what
+happened get discarded; anything recording a trap does not.
 
 **8. Check `GRAPH.md` against the actual tree.** The number of live pipelines,
 whether each slug resolves to a file that exists, whether the advanced-dates match
-the document banners.
+the document banners — and whether any entry has outgrown five to eight lines or
+started carrying its own history.
 
 **Do not erase history inside `docs/archive/` documents that stay.** Mark the
 outdated passage "as of then" and add what changed. Elsewhere, correct the line.
@@ -349,5 +413,5 @@ outdated passage "as of then" and add what changed. Elsewhere, correct the line.
 Run cleanup over each of the session's project roots, not only the one you are
 sitting in — a second project's workspace is exactly where stale notes hide.
 
-Finish with `sync`, and report what was deleted and what survived — not a
-file-by-file diff.
+Finish with `sync`. Report the session-start reading before and after, then what
+was deleted and what survived — not a file-by-file diff.

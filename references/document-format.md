@@ -215,7 +215,7 @@ What is exact is the **skeleton**:
 ```markdown
 ## plans — <free prose subtitle>
 ### [[slug]] · planned MM-DD → advanced MM-DD · **status**
-<free prose, any number of lines, emoji markers and all>
+<free prose, emoji markers and all>
 
 ## docs — <free prose subtitle>
 ### design
@@ -247,7 +247,8 @@ authority that nothing keeps in step.
 ⚠️ **The body under an entry stays free, deliberately.** Only the skeleton above
 is structure; everything else is shown verbatim. A line a tool cannot classify is
 **displayed, never dropped** — dropping raises no error, and the reader concludes
-it was never written.
+it was never written. Free is not unbounded: a tool renders however many lines it
+finds, but **how many belong there is `workspace.md`'s cap.**
 
 ## Emoji markers — a closed vocabulary
 

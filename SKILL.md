@@ -608,6 +608,10 @@ Prune the current project's workspace so a new session can trust it. **This is a
 judgment task, not a script** — there is nothing to run. The procedure is in
 `references/workspace.md`, under "Closing a pipeline" and "Cleanup".
 
+**Its measure is reduction.** Count what every session reads — `GRAPH.md` plus
+`notes/` — before and after, report both, and call a run that ends larger a
+failed cleanup.
+
 ## /csync config [key] [value]
 
 Read or change `csync.conf` — **that file and nothing else.** The machine-local
