@@ -113,6 +113,20 @@ git -C ~/.claude/skills/csync remote add upstream https://github.com/redzefyr/cs
 git clone https://github.com/redzefyr/csync.git ~/.claude/skills/csync
 ```
 
+이 경로는 임의가 아니다. Claude Code 는 `~/.claude/skills` 아래에서만 스킬을 찾고,
+`/csync` 를 명령으로 만드는 것은 그 링크 하나뿐이다. 나머지는 이 경로에 의존하지
+않으므로 — 스크립트는 전부 포인터를 통해 해석한다 — clone 은 저장소를 모아두는 곳
+어디에 둬도 되고, 거기서 링크만 걸려 있으면 된다. 첫 설치에서는 링크를 직접 만든다.
+아직 그 일을 시킬 `/csync` 가 없기 때문이다:
+
+```bash
+git clone https://github.com/redzefyr/csync.git ~/dev/csync
+ln -s ~/dev/csync ~/.claude/skills/csync
+```
+
+그 뒤로는 `install.sh` 가 이 링크를 관리한다 — clone 이 옮겨지면 다시 걸고, 제거할
+때 함께 지운다.
+
 그다음 Claude Code 에서:
 
 ```
@@ -138,7 +152,7 @@ cd ~/dev/my-project
 
 ```
 ~/.claude/
-├── skills/csync/              이 스킬 (이 저장소의 clone)
+├── skills/csync/              이 스킬 (이 저장소의 clone, 또는 그 clone 으로의 링크)
 ├── csync-tool   -> ~/.claude/skills/csync      포인터, 머신 로컬
 ├── csync-repo   -> ~/.csync                    포인터, 머신 로컬
 ├── csync-projects                              연결된 프로젝트 레지스트리
@@ -384,15 +398,21 @@ pull 만으로는 적용되지 않는 것도 함께 짚는다. `SKILL.md` 나 `r
 /csync uninstall
 ```
 
-csync 가 만든 모든 심볼릭 링크를 그것이 가리키던 것의 실제 사본으로 교체하므로 이후
-아무것도 사라지지 않으며, hook·포인터·레지스트리를 제거한다. **sync 저장소와 프로젝트
-작업 공간은 그대로 둔다** — 그것을 지우는 것은 사용자의 판단이다. `--dry-run` 을 먼저
-실행한다. 스킬은 그렇게 한다.
+사용자 자신의 내용을 담은 심볼릭 링크 — 글로벌 `CLAUDE.md` 와 각 메모리 디렉토리 — 는
+가리키던 것의 실제 사본으로 교체하므로 이후 아무것도 사라지지 않는다. 배선에 지나지
+않는 링크는 그대로 제거한다: 포인터·레지스트리·hook·`bin/` 래퍼·스킬 링크. **sync
+저장소와 프로젝트 작업 공간, 그리고 스킬 자신의 clone 은 그대로 둔다** — 그것을 지우는
+것은 사용자의 판단이다. `--dry-run` 을 먼저 실행한다. 스킬은 그렇게 한다.
 
 ## 뭔가 잘못돼 보일 때
 
 **"글로벌 CLAUDE.md 와 메모리가 사라졌다."** clone 이 옮겨져 심볼릭 링크가 끊어진
-것이다. `install.sh` 를 다시 실행하면 두 포인터와 hook 경로를 다시 쓴다.
+것이다. `install.sh` 를 다시 실행하면 두 포인터와 스킬 링크, hook 경로를 다시 쓴다.
+
+**`/csync` 가 명령으로 잡히지 않는다.** `~/.claude/skills/csync` 에서 스킬을 찾지
+못한 것이다. clone 이 다른 곳에 있다면 셸에서 그 clone 의 `scripts/install.sh` 를
+실행하고 — 링크를 만드는 것이 그 스크립트다 — 세션을 새로 시작한다. 스킬은 세션
+시작 시점에 로드된다.
 
 **프로젝트에서 `.csync/` 가 untracked 로 뜬다.** 글로벌 git excludes 파일에서 항목이
 빠진 것이다. 설치 스크립트를 다시 실행하면 되돌아온다.

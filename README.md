@@ -121,6 +121,21 @@ leaving the machine and no account anywhere.
 git clone https://github.com/redzefyr/csync.git ~/.claude/skills/csync
 ```
 
+That path is not incidental: Claude Code discovers skills under
+`~/.claude/skills`, and that link is the only thing that makes `/csync` a
+command. Nothing else depends on it — the scripts resolve everything through
+pointers — so the clone can live wherever you keep your repositories, as long as
+it is linked from there. On a first install you make the link yourself, since
+there is no `/csync` yet to ask:
+
+```bash
+git clone https://github.com/redzefyr/csync.git ~/dev/csync
+ln -s ~/dev/csync ~/.claude/skills/csync
+```
+
+`install.sh` maintains it from then on — it repoints the link when the clone
+moves, and removes it on uninstall.
+
 Then, in Claude Code:
 
 ```
@@ -147,7 +162,7 @@ cd ~/dev/my-project
 
 ```
 ~/.claude/
-├── skills/csync/              this skill (a clone of this repo)
+├── skills/csync/              this skill (a clone of this repo, or a link to one)
 ├── csync-tool   -> ~/.claude/skills/csync      pointer, machine-local
 ├── csync-repo   -> ~/.csync                    pointer, machine-local
 ├── csync-projects                              registry of connected projects
@@ -406,15 +421,23 @@ guarantee that you are current.
 /csync uninstall
 ```
 
-replaces every symlink csync created with a real copy of what it pointed at, so
-nothing disappears afterwards, and removes the hook, the pointers and the
-registry. **The sync repo and your project workspaces are left where they are** —
-deleting those is your call. Run it with `--dry-run` first; the skill does.
+replaces the symlinks holding your own content — the global `CLAUDE.md` and every
+memory directory — with real copies, so nothing disappears afterwards. The links
+that are only wiring are removed outright: the pointers, the registry, the hook,
+the `bin/` wrappers and the skill link. **The sync repo, your project workspaces
+and the skill's own clone are left where they are** — deleting those is your call.
+Run it with `--dry-run` first; the skill does.
 
 ## When something looks wrong
 
 **"My global CLAUDE.md and memory vanished."** A clone moved and the symlinks are
-dangling. Re-run `install.sh`; it rewrites both pointers and the hook path.
+dangling. Re-run `install.sh`; it rewrites both pointers, the skill link and the
+hook path.
+
+**`/csync` is not a command.** Claude Code found no skill at
+`~/.claude/skills/csync`. If your clone lives elsewhere, run its
+`scripts/install.sh` from a shell — that is what creates the link — then start a
+new session, since skills are loaded at session start.
 
 **`.csync/` shows up as untracked in a project.** The entry fell out of your global
 git excludes file. Re-running the installer puts it back.

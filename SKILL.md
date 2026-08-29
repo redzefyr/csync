@@ -207,7 +207,8 @@ Re-run `$TOOL/scripts/install.sh` when a **new link** is needed, or one broke:
 | A new wrapper appeared in the sync repo's `bin/` | `~/.local/bin` links are per-file |
 | The workspace shows up as untracked in a project repo | `$WS/` fell out of the global excludes file |
 | The SessionStart pull stopped running | The hook entry in `~/.claude/settings.json` is gone |
-| **Either clone moved** | Re-running rewrites both pointers and the hook path in one shot |
+| `/csync` stopped being a command | The link at `~/.claude/skills/csync` is gone. Run the clone's `scripts/install.sh` from a shell — there is no `/csync` left to invoke — and start a new session |
+| **Either clone moved** | Re-running rewrites both pointers, the skill link and the hook path in one shot |
 
 It is idempotent — run it when nothing is needed and it prints what already
 exists and changes nothing. When in doubt, run it.
@@ -775,10 +776,14 @@ that looks live and is not:
 ## /csync uninstall
 
 Run `$TOOL/scripts/uninstall.sh --dry-run` first, show the plan, then run it for
-real. Every symlink csync created is replaced by a real copy, so nothing
-disappears when the sync repo is later deleted. The sync repo and the project
-workspaces are left in place — deleting those is the user's call, and worth
-saying out loud when you report.
+real. Symlinks holding the user's own content — the global `CLAUDE.md` and every
+memory directory — are replaced by real copies, so nothing disappears when the
+sync repo is later deleted. The links that are only wiring are removed outright,
+the skill link at `~/.claude/skills/csync` among them. The sync repo, the project
+workspaces and the tool clone are left in place — deleting those is the user's
+call, and worth saying out loud when you report. When the tool clone *is*
+`~/.claude/skills/csync`, say so too: the skill stays loaded until they remove
+it, and every subcommand then fails on a missing pointer.
 
 ---
 

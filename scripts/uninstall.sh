@@ -112,6 +112,20 @@ if [ -L "$CSYNC_TOOL_POINTER" ]; then
   echo "remove:   $CSYNC_TOOL_POINTER"
   act rm -f "$CSYNC_TOOL_POINTER"
 fi
+
+# The skill link, when install.sh created one because the clone lives outside
+# ~/.claude/skills. Unlink rather than copy, the way the bin/ wrappers are: a
+# skill left behind here would still be loaded every session, and it would then
+# find no pointer to resolve -- /csync exists and every subcommand fails.
+#
+# A real directory is the clone itself, installed the documented way. Removing
+# someone's clone is their call, so it is reported at the end instead.
+SKILL_LINK="$CLAUDE_DIR/skills/csync"
+if [ -L "$SKILL_LINK" ]; then
+  echo "remove:   $SKILL_LINK (-> $(readlink "$SKILL_LINK"))"
+  act rm -f "$SKILL_LINK"
+fi
+
 if [ -f "$CSYNC_REGISTRY" ]; then
   echo "remove:   $CSYNC_REGISTRY"
   act rm -f "$CSYNC_REGISTRY"
@@ -121,6 +135,11 @@ echo
 WS="$(csync_workspace "$REPO_ROOT")"
 echo "left alone on purpose:"
 echo "  - the sync repo at $REPO_ROOT"
+if [ -d "$SKILL_LINK" ] && [ ! -L "$SKILL_LINK" ]; then
+  echo "  - the skill's own clone at $SKILL_LINK, which Claude Code still loads."
+  echo "    /csync stays a command until you delete it; its subcommands now fail,"
+  echo "    since the pointers they resolve through are gone"
+fi
 echo "  - every project's $WS/ clone"
 echo "  - '$WS/' in your global git excludes file -- removing it would make"
 echo "    every leftover $WS/ show up as untracked in its project repo"

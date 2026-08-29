@@ -119,7 +119,28 @@ else
   act ln -sfn "$TOOL_ROOT" "$CSYNC_TOOL_POINTER"
 fi
 
-# 3. Ignore the workspace dir in every repo, without touching shared
+# 3. Claude Code only discovers skills under ~/.claude/skills. The pointer above
+#    lets the scripts and templates find each other from anywhere, but nothing
+#    loads SKILL.md, so a clone kept elsewhere leaves the *skill* uninstalled --
+#    /csync is simply not a command. Link the clone into place.
+SKILL_LINK="$CLAUDE_DIR/skills/csync"
+if [ "$(csync_abspath "$SKILL_LINK")" = "$TOOL_ROOT" ]; then
+  echo "ok:       $SKILL_LINK (already resolves to the tool repo)"
+elif [ -e "$SKILL_LINK" ] && [ ! -L "$SKILL_LINK" ]; then
+  # A real directory: a second clone, installed the documented way. Backing it
+  # up the way link() does would move someone's git clone aside, so refuse and
+  # say which copy is actually in force -- that one is, not this one.
+  echo "SKIP:     $SKILL_LINK is a real directory, not a link to this clone." >&2
+  echo "          Claude Code loads that copy of the skill, not $TOOL_ROOT." >&2
+  echo "          Remove it, or install from it instead, then re-run." >&2
+else
+  [ -L "$SKILL_LINK" ] && echo "REPOINT:  $SKILL_LINK (was -> $(readlink "$SKILL_LINK"))"
+  echo "link:     $SKILL_LINK -> $TOOL_ROOT"
+  act mkdir -p "$(dirname "$SKILL_LINK")"
+  act ln -sfn "$TOOL_ROOT" "$SKILL_LINK"
+fi
+
+# 4. Ignore the workspace dir in every repo, without touching shared
 #    .gitignore files that belong to the projects themselves.
 excludes="$(git config --global core.excludesFile 2>/dev/null || true)"
 if [ -z "$excludes" ]; then
@@ -139,7 +160,7 @@ else
   fi
 fi
 
-# 4. Global CLAUDE.md. When neither side exists yet, seed the repo copy first:
+# 5. Global CLAUDE.md. When neither side exists yet, seed the repo copy first:
 #    link() would otherwise leave a dangling symlink at ~/.claude/CLAUDE.md,
 #    which reads as "Claude lost my global instructions".
 if [ ! -e "$REPO_ROOT/global/CLAUDE.md" ] && [ ! -e "$CLAUDE_DIR/CLAUDE.md" ]; then
@@ -152,7 +173,7 @@ if [ ! -e "$REPO_ROOT/global/CLAUDE.md" ] && [ ! -e "$CLAUDE_DIR/CLAUDE.md" ]; t
 fi
 link "$REPO_ROOT/global/CLAUDE.md" "$CLAUDE_DIR/CLAUDE.md"
 
-# 5. CLI wrappers: link everything in the repo's bin/ into ~/.local/bin.
+# 6. CLI wrappers: link everything in the repo's bin/ into ~/.local/bin.
 if [ -d "$REPO_ROOT/bin" ]; then
   for f in "$REPO_ROOT"/bin/*; do
     [ -f "$f" ] || continue
@@ -164,7 +185,7 @@ if [ -d "$REPO_ROOT/bin" ]; then
   esac
 fi
 
-# 6. Per-project memory: adopt local dirs into the repo, then link every dir
+# 7. Per-project memory: adopt local dirs into the repo, then link every dir
 #    the repo already has (covers dirs created on another machine).
 #
 # Claude keys project dirs by absolute path with '/' and '.' mangled to '-'
@@ -231,7 +252,7 @@ for mdir in "$REPO_ROOT"/global/memory/*/; do
   link_memory "${mdir%/}" "$CLAUDE_DIR/projects/$(local_name "$(basename "$mdir")")/memory"
 done
 
-# 7. SessionStart hook -> the tool repo's pull script. The path is the skill's
+# 8. SessionStart hook -> the tool repo's pull script. The path is the skill's
 #    own directory, not the sync repo's, so moving the sync repo never breaks
 #    the hook.
 HOOK_CMD="$TOOL_ROOT/scripts/csync-pull.sh"
