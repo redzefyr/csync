@@ -1,6 +1,6 @@
 ---
 name: csync
-description: Sync Claude Code's global CLAUDE.md, per-project memory, and a per-project workspace directory through one private git repo you own — and organise what goes in those workspaces. Use for /csync (bare — setup if not installed, init if this project is not connected, sync otherwise), /csync setup|sync|list|open|init|config|pull|push|status|cleanup|remote|update|uninstall, when the user asks what pipelines are open or how far along they are, when the user picks a pipeline to take up for this session or asks to open one by slug, when the user asks to sync Claude settings, memory, plans, or notes, when tidying a project's plans/notes/docs, or when asking whether install.sh needs re-running after connecting a project or moving a clone. Also the source of truth for how workspace documents are organised — GRAPH.md as the session entry point, one pipeline per plan file named <planned>-<advanced>-<slug>, notes capped at decisions and traps, docs live vs research archive — so consult it when creating, renaming, closing, or filing a workspace document, or when deciding what to read at the start of a session.
+description: Sync Claude Code's global CLAUDE.md, per-project memory, and a per-project workspace directory through one private git repo you own — and organise what goes in those workspaces. Use for /csync (bare — setup if not installed, init if this project is not connected, sync otherwise), /csync setup|sync|list|open|init|config|pull|push|status|cleanup|remote|update|uninstall, when the user asks what pipelines are open or how far along they are, when the user picks a pipeline to take up for this session or asks to open one by slug, when the user asks to sync Claude settings, memory, plans, or notes, when tidying a project's plans/notes/docs, or when asking whether install.sh needs re-running after connecting a project or moving a clone. Also the source of truth for how workspace documents are organised — GRAPH.md as the session entry point, one pipeline per plan file named <planned>-<advanced>-<slug>, notes capped at decisions and traps, docs split into design (live) and archive — so consult it when creating, renaming, closing, or filing a workspace document, or when deciding what to read at the start of a session.
 ---
 
 # csync
@@ -389,14 +389,15 @@ project directory's basename. Refuse if `$WS/` already exists.
 2. If it does — another machine connected this project — clone it:
    `git clone -b "prj/<name>" --single-branch <origin> "$WS"`
 3. If not, create it and scaffold. Doing the scaffold now matters: an empty
-   `notes/` invites session logs and an empty `docs/` invites archive material at
-   the root, and both are hard to undo once the project has content.
+   `notes/` invites session logs, and a `docs/` with nothing under it invites
+   documents at its root — where nothing states their lifetime. Both are hard to
+   undo once the project has content.
 
    ```bash
    git init -b "prj/<name>" "$WS"
    git -C "$WS" remote add origin <origin>
-   mkdir -p "$WS/docs/research" "$WS/plans" "$WS/notes"
-   touch "$WS/docs/research/.gitkeep" "$WS/plans/.gitkeep"
+   mkdir -p "$WS/docs/design" "$WS/docs/archive" "$WS/plans" "$WS/notes"
+   touch "$WS/docs/design/.gitkeep" "$WS/docs/archive/.gitkeep" "$WS/plans/.gitkeep"
    cp "$TOOL/templates/workspace/gitignore" "$WS/.gitignore"
    cp "$TOOL/templates/workspace/CLAUDE.md" "$TOOL/templates/workspace/GRAPH.md" "$WS/"
    cp "$TOOL/templates/workspace/notes/"*.md "$WS/notes/"
@@ -800,7 +801,11 @@ it, and every subcommand then fails on a missing pointer.
   frontmatter each kind carries, the exact position of the `## findings` block,
   the emoji vocabulary, and what a tool may and may not read. **Read it before
   writing one, and copy the matching file from `templates/document/` rather than
-  rebuilding a header from prose** — every deviation found in the wild so far
-  came from reconstructing one from memory.
+  rebuilding a header from prose.**
+- `references/rationale.md` — the incidents the two files above came out of.
+  ⚠️ **Not read to do work.** Read it only when a rule in one of them is being
+  changed, or when the user asks why a rule exists. Keeping those reasons inline
+  is what turned every session into a reader of several hundred lines of incident
+  narration — and what taught sessions to write the user's documents that way.
 - `references/divergence.md` — what to do when a clone has diverged.
 - `references/lsp.md` — language-server detection during `init`.

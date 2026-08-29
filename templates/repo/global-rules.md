@@ -5,9 +5,10 @@
   `GRAPH.md` is the entry point — live pipelines and the next step for each are
   there, and **one pipeline is advanced per session**.
 - Files Claude creates and maintains — working notes, plans, design documents,
-  research, scratch scripts — go under `{{WS}}/`, not into the project repo.
-  - `{{WS}}/plans/` — one pipeline per file · `{{WS}}/docs/` — live, with
-    `docs/research/` as archive · `{{WS}}/notes/` — decisions and traps, nothing else
+  measurements, scratch scripts — go under `{{WS}}/`, not into the project repo.
+  - `{{WS}}/plans/` — one pipeline per file · `{{WS}}/docs/design/` — live,
+    design only · `{{WS}}/docs/archive/` — the judgment of a given day ·
+    `{{WS}}/notes/` — decisions and traps, nothing else
   - **Session notes and scratch files do not go in `{{WS}}/`.** Use a scratchpad.
     The structure rules live in the csync skill's `references/workspace.md`
 - Exception: code, tests, and documents shared with the team follow the

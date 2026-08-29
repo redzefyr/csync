@@ -11,8 +11,8 @@ Two things go into one private git repository you own:
 1. **Claude's global state** — your `~/.claude/CLAUDE.md` and the per-project
    memory directories Claude writes to.
 2. **A workspace directory inside each project** (`.csync/` by default) — plans,
-   decisions, traps and research that belong to the work but do not belong in the
-   project repo.
+   decisions, traps and measurements that belong to the work but do not belong in
+   the project repo.
 
 Install it, type `/csync`, and it walks you through the rest.
 
@@ -287,14 +287,15 @@ you switch machines.
 │   ├── decisions.md   what must not be reversed, and why
 │   └── traps.md       what is easy to step on
 └── docs/
-    ├── *.md           live — revised whenever code or conventions change
-    └── research/      archive — the judgment of a given day, left as written
+    ├── design/        live — design only, revised whenever the code changes
+    └── archive/       the judgment of a given day, left as written
 ```
 
-The shape is the point. The three directories have **different lifetimes**:
-plans are deleted when they close, notes are permanent but deliberately capped,
-docs are permanent and may grow. Mixing them means reading all three to decide
-anything, and once that is true nobody reads any of them.
+The shape is the point. These directories have **different lifetimes**: plans are
+deleted when they close, notes are permanent but deliberately capped, design docs
+are permanent and get revised, archive is permanent and never does. Mixing them
+means reading all of them to decide anything, and once that is true nobody reads
+any of them. The lifetime is in the path, so it does not have to be remembered.
 
 `GRAPH.md` is what a session reads first. It says which pipelines are live, what
 the next step is for each, and where everything else went when it closed.
@@ -375,7 +376,7 @@ Everything under `global/` goes to the remote verbatim:
 - **`global/CLAUDE.md`** — your standing instructions to Claude.
 - **`global/memory/**`** — everything Claude has recorded about each project:
   decisions, environment details, things you told it to remember.
-- **every `prj/<name>` branch** — your plans, notes and research per project.
+- **every `prj/<name>` branch** — your plans, notes and design docs per project.
 
 Memory and workspace notes routinely contain internal details about the work.
 **Keep the repository private.** Before the first push — during `setup`, and again

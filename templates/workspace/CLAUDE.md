@@ -4,7 +4,7 @@
 
 Claude's workspace for this project. This directory is not part of the project
 repo: it syncs to the `prj/{{NAME}}` branch of your csync repo. Files Claude
-creates and maintains — working notes, plans, findings, scratch analysis — live
+creates and maintains — working notes, plans, findings, design documents — live
 here rather than in the project repo.
 
 **Read `GRAPH.md` and `notes/` at the start of every session.** `GRAPH.md` is the
@@ -17,15 +17,19 @@ The source of truth for the structure rules is the csync skill's
 `## findings` block, the emoji vocabulary — is `references/document-format.md`.
 
 ⚠️ **When you create a document here, copy the template from
-`templates/document/` and fill it in. Do not rebuild the header from memory** —
-every deviation found so far came from doing exactly that.
+`templates/document/` and fill it in. Do not rebuild the header from memory.**
 
 - `GRAPH.md` — entry point. It also resolves `[[slug]]` references to files
 - `plans/` — one pipeline = one file, `<planned>-<advanced>-<slug>.md`
 - `notes/` — `decisions` (what must not be reversed) and `traps` (what is easy to
   step on), and nothing else. It is loaded every session, so keep it small
   (gauge: 400 lines)
-- `docs/` — **live**, revised whenever code or conventions change ·
-  `docs/research/` — **archive**, the judgment of a given day, left as written
+- `docs/design/` — **live**, design only: how something is built, or the
+  criterion it was built against. Revised when the code changes
+- `docs/archive/` — the judgment of a given day, left as written. Not the pile
+  you can skip: the grounds an option was rejected on live here
+
+Nothing sits directly in `docs/`. Procedures, structural surveys and analysis
+guides belong to the code, so they go in the project repo, not here.
 
 Commit and push with `/csync sync` when wrapping up.

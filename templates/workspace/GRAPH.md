@@ -23,11 +23,12 @@ is displayed, never dropped.
 
 ## docs — location is lifetime
 
-**`docs/*.md` is live** — revise it when code or conventions change.
-**`docs/research/**` is archive** — the judgment of a given day, left as written.
+**`docs/design/` is live** — design only, revised when the code changes.
+**`docs/archive/` is the judgment of a given day**, left as written.
+Nothing sits directly in `docs/`.
 
-### live
-### archive (`docs/research/`)
+### design
+### archive
 
 ## notes — gauge 400 lines (principle: loaded every session)
 
