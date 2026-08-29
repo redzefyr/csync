@@ -700,7 +700,9 @@ That line is a notice, not the report, and **not an instruction to run the
 update.** Relay it and let the user choose when — applying it mid-session moves
 the rules under the work in progress, and the clone may be one they are editing.
 It stays silent when the clone is ahead or the fetch failed, so **no line does
-not mean up to date.**
+not mean up to date.** A clone whose history was rewritten upstream counts as
+*ahead* of a history it shares nothing with, so it is silent there too —
+permanently, and in the one case the user most needs told.
 
 **1. Record the revision before pulling.** Afterwards there is nothing left to
 compare against, and `git pull`'s own output is a file list, not a report.
@@ -713,9 +715,38 @@ after=$(git -C "$TOOL" rev-parse HEAD)
 
 Equal revisions are the whole report: "csync: already up to date."
 
-A `--ff-only` failure means this clone carries local commits or a dirty tree.
-Say so and stop — the tool repo may be one the user is editing, and merging or
-rebasing to force the update through is their call, not yours.
+A `--ff-only` failure has **three causes that need different answers.** Tell them
+apart before saying anything:
+
+```bash
+git -C "$TOOL" merge-base HEAD @{upstream}    # a commit for the first two, fails for the third
+```
+
+| what happened | what to say |
+|---|---|
+| the clone carries local commits | this clone is one the user is editing. Say so and stop — merging or rebasing to force the update through is their call, not yours |
+| the working tree is dirty | same answer, same reason |
+| **no common ancestor** | origin's history was **rewritten**. This clone holds no local work to rescue, and no pull will ever succeed again |
+
+⚠️ **The third reads exactly like the first unless you check**, and the misreading
+costs the user real time: it tells them they have local commits to protect when
+they have none, and leaves the clone stuck on a history that no longer exists.
+Git's own wording invites it — the failure says `Diverging branches can't be
+fast-forwarded`, and **that is not the `DIVERGED` this skill means elsewhere.**
+That one is two real histories off a shared root, and it is repairable; this one
+has no shared root at all, and nothing merges it back.
+
+A rewritten history is not something to merge past. Report it as what it is, and
+let the user pick — resetting in place **discards whatever this clone holds**, so
+it is theirs to choose, not yours to run:
+
+```bash
+git -C "$TOOL" fetch origin && git -C "$TOOL" reset --hard origin/main
+```
+
+Re-cloning is the other answer and the cleaner one, since it drops the old objects
+too. Either way, re-run `install.sh` afterwards — it is idempotent, and it is what
+repairs any link the replacement disturbed.
 
 **2. Read the range, and report behaviour rather than filenames.**
 

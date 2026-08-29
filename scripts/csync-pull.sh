@@ -64,12 +64,30 @@ pull_one() {
 # normal and would otherwise add a line to every session, and a clone that is
 # ahead is someone's working tree -- not something a session-start hook should
 # have an opinion about.
+#
+# The one exception is a clone that shares no history with origin, because
+# origin was rewritten. That clone counts as *ahead* of a history it has nothing
+# in common with, so the silence above would swallow it -- permanently, and in
+# the one case where nothing else will say it either: `/csync update` only runs
+# when the user asks, and its --ff-only failure reads like ordinary local work.
+# Being ahead is a state the user chose; this one happened to them.
 check_tool_update() {
   local dir counts ahead behind
   dir="$(csync_tool)" || return 0
   [ -e "$dir/.git" ] || return 0     # installed by copying files, not by cloning
 
   git -C "$dir" fetch --quiet origin 2>/dev/null || return 0
+
+  # No upstream at all is not a rewrite -- say nothing. Checking this first
+  # keeps the merge-base below from reading a missing ref as a rewritten one.
+  git -C "$dir" rev-parse --verify --quiet '@{upstream}' >/dev/null 2>&1 || return 0
+
+  if ! git -C "$dir" merge-base HEAD '@{upstream}' >/dev/null 2>&1; then
+    echo "csync: tool clone shares no history with origin -- it was rewritten." >&2
+    echo "csync:   nothing local is broken and there is no work here to rescue," >&2
+    echo "csync:   but no pull will succeed again. Re-clone, or reset --hard to origin." >&2
+    return 0
+  fi
 
   counts="$(git -C "$dir" rev-list --left-right --count 'HEAD...@{upstream}' 2>/dev/null)" || return 0
   ahead="${counts%%[[:space:]]*}"
