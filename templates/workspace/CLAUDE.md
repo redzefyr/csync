@@ -13,7 +13,12 @@ been closed. **Advance one pipeline per project per session** (a session that
 opened several projects gets one in each), and when you finish, update that
 plan's "next step" and the advanced-date in its filename.
 The source of truth for the structure rules is the csync skill's
-`references/workspace.md`.
+`references/workspace.md`; the shape the documents take — YAML frontmatter, the
+`## findings` block, the emoji vocabulary — is `references/document-format.md`.
+
+⚠️ **When you create a document here, copy the template from
+`templates/document/` and fill it in. Do not rebuild the header from memory** —
+every deviation found so far came from doing exactly that.
 
 - `GRAPH.md` — entry point. It also resolves `[[slug]]` references to files
 - `plans/` — one pipeline = one file, `<planned>-<advanced>-<slug>.md`

@@ -13,6 +13,13 @@ reads any of them.
 `GRAPH.md` sits at the workspace root, one per project. It is **the entry point,
 read at the start of every session together with `notes/`**.
 
+**This file says what each directory is for and how long its contents live.**
+What the documents *look like* — the frontmatter keys, the `## findings` block,
+the emoji vocabulary, and what a tool may and may not read — is
+`document-format.md`. Read that one before creating or editing a document, and
+**copy the template from `templates/document/` rather than reconstructing a
+header from prose.**
+
 ## Reference documents by slug, not by filename
 
 In document bodies, point at other documents with **`[[slug]]`**. Filenames carry
@@ -26,7 +33,7 @@ memory directories already use.)
 ## `plans/` — the filename states the progress
 
 ```
-plans/<planned>-<advanced>-<slug>.md     e.g. 20260820-20260824-license-feature-flags.md
+plans/<planned>-<advanced>-<slug>.md     e.g. 20260820-20260824-search-index-rebuild.md
 ```
 
 **The advanced-date is the day that pipeline actually moved.** Fixing a banner,
@@ -34,14 +41,14 @@ correcting a typo, touching it during cleanup — **none of those are progress**
 If the date rises for those, the signal "how long has this been parked" dies, and
 that signal is the only reason this name exists.
 
-Every plan opens with a **fixed three-line header**, so the file can be judged
-without opening it:
+Every plan opens with **YAML frontmatter** carrying `status`, `next` and
+`blocked`, so the file can be judged without opening it. The exact keys are in
+`document-format.md`; copy `templates/document/plan.md` rather than rebuilding
+the header from memory.
 
-```markdown
-> **Status**: active | waiting | parked (reason)
-> **Next step**: (one sentence, so the next session can start on it as written)
-> **Blocked by**: (say "nothing" when nothing)
-```
+`status` is a closed set — `active` · `waiting` · `parked` — because it is the
+one field that gets counted. The prose version of the status rides alongside it
+in `status_note`, **in the words of the session that did the work.**
 
 - **Do not leave finished sections in a plan.** Keep a one-line conclusion and
   push the evidence into `docs/`. This is the only thing stopping a plan from
@@ -68,13 +75,11 @@ know**. The one-per-session rule means you cannot go and fix it there, and not
 handing it over means the finding disappears. **Put it in the other plan as a
 `## findings` block.**
 
-```markdown
-## findings — carried over from other work (fold these in when you start)
-
-### YYYY-MM-DD · found while working on <what>
-**What it touches**: premise | next step | cost — one line
-A few lines of body. Push the numbers into `docs/` and only point at them here.
-```
+Copy `templates/document/findings-entry.md`. **The position is exact** — `##`
+at column zero, entries at `###`, never inside a blockquote — and
+`document-format.md` says why: this block has been written in another shape
+before, and a reader that does not recognise it reports **zero pending
+findings**, which is read as "nothing waiting".
 
 ⚠️ **The finder does not re-prioritise the other pipeline.** Do not add sections
 to its body and do not rewrite its "next step" banner — **what comes first is
@@ -159,6 +164,12 @@ reasoning, and **a session mistook it for a ceiling the user had set**
 (2026-08-27). The gauge may be adjusted when the principle calls for it — **but
 write down why that value, here, at the same time.**
 
+**One flat list of `##` entries per file**, and a decision entry carries its
+reason as a marked paragraph — `document-format.md` has the shape, and
+`templates/document/` has both entry snippets. Marking the reason is what lets a
+reader see which decisions have none, instead of that surfacing years later when
+someone reverses one.
+
 Session notes, scratch and logs do not belong in `notes/`. Use a scratchpad.
 
 ## `docs/` — **location is lifetime**
@@ -176,6 +187,11 @@ One test: **"does this have to be corrected when code or conventions change?"**
 Yes → live, no → archive. It is usually settled **at creation time**, so moving
 things later is rare.
 
+A live document writes that answer down as `revise_when` in its frontmatter, so
+cleanup's "refresh `docs/`" step has something to check against instead of
+re-deriving it per file. Archive documents are ordinary markdown; frontmatter
+there is optional and carries at most `superseded_by`.
+
 **Archive is not "the stuff you can skip".** The reasoning behind an abandoned
 track, and the grounds on which it was rejected, live there — and when they
 cannot be found, the same experiment gets run again. That is why the directory is
@@ -191,31 +207,18 @@ changed while the analysis guide still told readers to look up the old keys.
 
 ## `GRAPH.md` — the entry point
 
-```markdown
-# GRAPH — <project> · updated YYYY-MM-DD
+The skeleton — which h2 sections exist, how a plan entry opens — is in
+`document-format.md`, and `init` scaffolds it. Two things about it belong here,
+because they are about what the file is *for* rather than what it looks like:
 
-## plans — one per session
+**Everything under an entry is free prose, and that is deliberate.** Real entries
+carry a dozen emoji-led lines. Only the skeleton is structure; the rest is shown
+as written. A line that cannot be classified is displayed, never dropped —
+dropping raises no error, and the reader concludes it was never written.
 
-### [[slug]] · planned MM-DD → advanced MM-DD · **status**
-`plans/<file>.md` — blocked: (omit when nothing) · ⚠️ findings xN (MM-DD) — only when there are
-→ Next step, one sentence. **If it is paired with another repository, name that repository in bold**
-
-## docs — location is lifetime
-### live
-- [[slug]] `docs/<path>` — one line
-### archive (`docs/research/`)
-- [[slug]] MM-DD — one line
-
-## notes — gauge 400 lines (principle: in context every session)
-- [[slug]] — one line
-
-## backlog — not big enough to open a pipeline
-- One line. Promote to a plan when it grows
-
-## closed pipelines
-- ~~[[slug]]~~ closed MM-DD `<commit>` — one-line conclusion
-  ↳ evidence [[docs-slug]] · trap [[notes-slug]]
-```
+**A path written next to a slug is for the reader, not for a tool.** Slugs
+resolve from filenames, so a tool reading paths here would be consulting a second
+authority that nothing keeps in step.
 
 **When to update it**: when a document is created or deleted, when a pipeline's
 status changes, and when a session closes. If `GRAPH.md` is wrong, nothing else
@@ -311,6 +314,19 @@ quietly revive a rule the user has already changed.
 `plans/` filenames that are not `<planned>-<advanced>-<slug>`, or hand-off notes
 and session logs sitting in `notes/` — move to the structure above before doing
 anything else. Otherwise what you tidy just piles up in the old place again.
+
+**Migrating documents to the frontmatter format belongs here too, and nowhere
+else.** A document without frontmatter is legacy, not broken: it reads fine, and
+tools report it as legacy rather than failing on it. Converting one is an edit to
+the user's own record, so it happens when they ask for cleanup — never
+opportunistically, in passing, while a session is doing something else.
+
+Convert by **moving** what is already there — a plan's leading blockquote becomes
+`status` / `status_note` / `next` / `blocked`, and `status_note` keeps the
+original wording. ⚠️ **Do not restate a status in your own words while
+converting.** That is the one way this migration can lose something, and it loses
+it invisibly: the reworded version is indistinguishable from what the session
+that did the work wrote.
 
 **1. Split live from finished.** A plan is live if *any* item in it is unstarted —
 not if it is mostly done. Check the actual state (grep the code, read the git log)

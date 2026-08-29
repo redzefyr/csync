@@ -460,8 +460,8 @@ it finds.** One row per file in `<project>/$WS/plans/`:
 
 | column | where it comes from |
 |---|---|
-| **banner** | `[[<slug>]] · <the Status line>` — slug from the filename's `<slug>` field, status from the plan's `> **Status**:` line. One line: trim it and drop the markup left dangling by the trim. ⚠️ **Trim it, never rewrite it** — summarising is rewriting, and a status reworded by a session that did not do the work is indistinguishable from one the session that did wrote, so every session after takes it as fact |
-| **findings** | how many `###` entries sit under that plan's `## findings` heading. Leave it blank when there is no such block |
+| **banner** | `[[<slug>]] · <status>` — slug from the filename's `<slug>` field, status from the plan's frontmatter: `status_note` when it has one, otherwise `status`. A plan with no frontmatter is **legacy** — fall back to a `> **Status**:` line in the body, and say `(legacy)` in the row. One line: trim it and drop the markup left dangling by the trim. ⚠️ **Trim it, never rewrite it** — summarising is rewriting, and a status reworded by a session that did not do the work is indistinguishable from one the session that did wrote, so every session after takes it as fact |
+| **findings** | how many `###` entries sit under that plan's `## findings` heading. Leave it blank when there is no such block. ⚠️ **A block whose entries are in some other shape is `?`, never `0`** — zero reads as "nothing waiting", and under-reporting is the failure this column exists to prevent |
 
 Order the rows **the way `GRAPH.md` lists them.** That order is a judgment the
 workspace already made — the leading pipeline is first — and re-sorting by date
@@ -503,8 +503,11 @@ workspace. Do not pick one.
    session's project roots. No match → say so and **stop; do not rename**. A
    title naming a plan nobody can open is worse than no title, because a sidebar
    is read as fact. A match in two projects → ask which; never guess
-2. **Report the plan's three-line header** — `Status`, `Next step`, `Blocked by`.
-   That next step is what this session starts on, as written
+2. **Report the plan's header** — `status` (with `status_note`), `next` and
+   `blocked`, from its frontmatter. That next step is what this session starts
+   on, as written. A legacy plan carries them as a leading blockquote instead;
+   read them there and say the plan is legacy — **do not migrate it here**, that
+   is `cleanup`'s call
 3. **Fold in `## findings` if the plan has one** — promote, backlog or reject
    each entry, per `references/workspace.md`. **This is the substance of the
    command**, not step 4: another session handed those over, and until they are
@@ -793,5 +796,11 @@ it, and every subcommand then fails on a missing pointer.
   `notes/`, `docs/`, the `## findings` hand-off, closing a pipeline, cleanup.
   **Read this before creating, renaming, filing or deleting any workspace
   document.**
+- `references/document-format.md` — what those documents **look like**: the YAML
+  frontmatter each kind carries, the exact position of the `## findings` block,
+  the emoji vocabulary, and what a tool may and may not read. **Read it before
+  writing one, and copy the matching file from `templates/document/` rather than
+  rebuilding a header from prose** — every deviation found in the wild so far
+  came from reconstructing one from memory.
 - `references/divergence.md` — what to do when a clone has diverged.
 - `references/lsp.md` — language-server detection during `init`.
