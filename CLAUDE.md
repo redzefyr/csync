@@ -28,7 +28,9 @@ tool. Keep all of this out:
 - **names** — the user, their machines, their git identity, their private remote
 - **their projects**, in any form — repo names, module names, a domain from their
   work, a real ticket or branch name
-- **paths under their home**, and their `workspace_dir` when it is not the default
+- **paths under their home** — including the directory names *between* `$HOME`
+  and a project, which are their layout and not a convention — and their
+  `workspace_dir` when it is not the default
 - **assumptions from their setup** — how many machines they run, what language
   they speak, which editor or toolchain they happen to use
 - **conventions inherited from their own global rules.** This repo's conventions
@@ -46,23 +48,37 @@ name has to be written down here:
 
 ```bash
 REPO="$(cd -P ~/.claude/csync-repo && pwd)"
+# the directory names between $HOME and a project — derived, never written here
+tree=$( { sed "s#^$HOME/##" ~/.claude/csync-projects 2>/dev/null; echo "${PWD#$HOME/}"; } |
+        sed 's#/[^/]*$##' | tr '/' '\n' | grep -v '^$' | sort -u )
+talt=$(printf '%s\n' "$tree" | paste -sd'|' - )
 pat=$( { echo "$HOME"; hostname -s
          git config --global user.email; git config --local user.email
-         ls "$REPO/global/memory" | sed 's/^Developer-project-//; s/^Developer-//' |
+         ls "$REPO/global/memory" | sed -E "s#^(($talt)-)+##" |
            awk -F- '{print; if (NF>1) print $1}'
          git -C "$REPO" remote get-url origin | sed 's#.*[/:]##; s#\.git$##'
          ws=$(sed -n 's/^ *workspace_dir *= *//p' "$REPO/csync.conf")
          [ "$ws" = .csync ] || echo "$ws"
        } | grep -v '^$' | grep -vxE 'csync|csync-tool|csync-repo' | awk 'length >= 4' |
        sed 's/[][^$.*\\/]/\\&/g' | sort -u | paste -sd'|' - )
-git diff --cached | grep -i -nE "$pat"
+# the tree itself — matched only where it reads as a path or a memory key, so an
+# ordinary English word that happens to be a directory name does not swamp the run
+tpat=$(printf '%s\n' "$tree" | awk 'length >= 3' | sed 's#.*#[/~-]&[/-]#' | paste -sd'|' - )
+git diff --cached | grep -i -nE "$pat|$tpat"
 ```
 
-It only knows what it can derive: memory-directory keys, the sync remote, the
-hostname, the git identity, `$HOME`, a non-default `workspace_dir`. A project the
-sync repo holds no memory for is invisible to it, and so is anything the user
-mentioned only in conversation. **A clean run is one check passed, not
-clearance** — read the diff too.
+It only knows what it can derive: memory-directory keys, the directory names
+between `$HOME` and a project, the sync remote, the hostname, the git identity,
+`$HOME`, a non-default `workspace_dir`. A project the sync repo holds no memory
+for is invisible to it, and so is anything the user mentioned only in
+conversation. **A clean run is one check passed, not clearance** — read the diff
+too.
+
+⚠️ **Nothing in this snippet may be a real name.** It has to derive every one of
+them, including the shape of the user's home directory tree — an earlier version
+hardcoded that tree into its own `sed`, so the check that exists to keep personal
+structure out of this repo was itself the thing leaking it. When the derivation
+gets awkward, make it more awkward; do not paste in the value.
 
 ### Commit identity
 
@@ -115,4 +131,4 @@ changes there — not in a second copy inside `SKILL.md`.
 
 Neither this repo nor the sync repo gets a workspace directory of its own; bare
 `/csync` always means `sync` inside them. csync work memory attaches to this
-project's key, `Developer-csync`, because this is where those sessions are opened.
+repo's own project key, because this is where those sessions are opened.
