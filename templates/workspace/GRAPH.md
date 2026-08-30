@@ -30,7 +30,7 @@ Nothing sits directly in `docs/`.
 ### design
 ### archive
 
-## notes — gauge 400 lines (principle: loaded every session)
+## notes — gauge 500 lines, this file included (principle: loaded every session)
 
 - [[decisions]] — what must not be reversed, and **why**
 - [[traps]] — what is easy to step on

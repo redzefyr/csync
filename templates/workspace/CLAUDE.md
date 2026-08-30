@@ -23,7 +23,7 @@ The source of truth for the structure rules is the csync skill's
 - `plans/` — one pipeline = one file, `<planned>-<advanced>-<slug>.md`
 - `notes/` — `decisions` (what must not be reversed) and `traps` (what is easy to
   step on), and nothing else. It is loaded every session, so keep it small
-  (gauge: 400 lines)
+  (gauge: 500 lines, `GRAPH.md` and `notes/` together)
 - `docs/design/` — **live**, design only: how something is built, or the
   criterion it was built against. Revised when the code changes
 - `docs/archive/` — the judgment of a given day, left as written. Not the pile
