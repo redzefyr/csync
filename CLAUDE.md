@@ -117,7 +117,7 @@ do not push, tag or publish a release unless asked.
 | file | written for | contains |
 |---|---|---|
 | `README.md` | a person installing or evaluating csync | what it does, how to set it up, what gets pushed, what to do when something looks wrong |
-| `SKILL.md` | Claude, at runtime | subcommand procedures and the rules governing them; `references/` holds what is too long to keep loaded |
+| `SKILL.md` | Claude, at runtime | the rules a session may need without knowing it, and enough of each subcommand to name and suggest it; `references/` holds what a session reads only once it is doing that thing |
 
 Keep them apart. Procedure does not go in `README.md`, and installation prose
 does not go in `SKILL.md`. The same split governs the sync repo's own two root
@@ -126,6 +126,31 @@ files — see its `CLAUDE.md` and `README.md`.
 `references/workspace.md` is the source of truth for how a workspace is
 organised. When a rule about `plans/`, `notes/`, `docs/` or `GRAPH.md` changes, it
 changes there — not in a second copy inside `SKILL.md`.
+
+### What may move to `references/`
+
+`SKILL.md` loads **whole**, on every trigger, in sessions that will run `list` and
+`open` and nothing else. A reference loads only when something sends a session to
+it. So the axis is not length — it is **how a session learns it needs the file**:
+
+- **A verb the user typed** — `setup`, `config`, `update`, `uninstall`. The
+  dispatch already routes there. `SKILL.md` keeps the command's name, what it will
+  do to the user's files, and a pointer: enough to *suggest* the command, never
+  enough to run it from memory
+- **A value the procedure already reads** — `open` probes `csync_auto_title`
+  before it needs any title rule, so the probe stays and the rules move
+- **A symptom, with no verb** — the workspace showing up untracked, `/csync` no
+  longer being a command, a gap a `bin/` wrapper would close. Nobody invokes
+  anything; the session has to recognise it unprompted. ⚠️ **These cannot move at
+  any length.** Filed where it is found only by someone already looking for it, a
+  rule fires after the mistake instead of before it
+
+A ⚠️ guard stays where the damage happens even when the section around it moves.
+`setup`'s privacy probes are in `references/setup.md`; **"do not merely ask"** is
+not. Splitting a section is normal; splitting it *at the guard* is the point.
+
+Judge a move by `SKILL.md`'s own size afterwards. Total bytes across the repo
+going up is expected — pointers cost something, and that is the trade.
 
 ## No workspace here
 
