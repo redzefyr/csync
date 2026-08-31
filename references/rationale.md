@@ -73,6 +73,25 @@ waiting" — the failure is silent and looks like good news. That is why the rul
 is stated as an exact position rather than an example, and why the template is a
 file to copy rather than prose to follow.
 
+### Weighing a finding is not folding it
+
+**2026-08-30.** In a real workspace, a session asked to continue a pipeline read
+the plan's `## findings`, let one of them change its judgment about the next step,
+and started work — leaving the entry exactly where it was. Nothing was lost and
+nothing looked wrong, which is why it went unnoticed: an entry that is still there
+reads as *not yet judged*, so every later session re-decides it, and the ones that
+know it was settled are gone.
+
+The diagnosis was **placement, not wording**. The fold rule was stated twice, in
+`workspace.md`'s session-start steps and in `SKILL.md`'s `open` — both of which
+require the skill to have loaded. The session that folds is usually driven by the
+workspace's own `CLAUDE.md`, `GRAPH.md` and the plan, and none of those said
+anything about findings; the one line that did reach it, the block's own heading,
+read "fold these in when you start", which is fairly read as *take these into
+account*. So the verdict vocabulary went in-band — into the heading, into prose
+that travels with the block, into a comment marked to survive — and into the two
+always-read files.
+
 ### There is no numeric threshold for escalating stalled findings
 
 An earlier draft wanted one. A number invented to look decisive is one more
@@ -88,6 +107,39 @@ number as a ceiling the user had set, then trimmed content to hit it. Two rules
 came out of that: the number is derived from the principle and loses to it, and
 folding means *moving*, not discarding. The gauge went to 400 at the same time,
 because running over costs less than losing something while trimming.
+
+### A decision carries who may revise it
+
+**2026-09-01.** `notes/decisions.md` was titled "what must not be reversed" and had
+one authority level, while its write paths mixed two sources: the user's explicit
+instructions, and everything the closing table routes in at the end of a pipeline —
+which is Claude's own conclusion. Two failures follow, both silent, and which one
+occurs is settled by whichever reading the session arrives with. Read as the title
+says, Claude's stale conclusions inherit the user's protection and the file
+accumulates exactly as the preservation-only rules once made everything accumulate.
+Read as the overwrite licence allows, the user's decisions lose theirs and change
+without anyone choosing that.
+
+The template already had a `{{WHO}}` slot, defined nowhere and read by nothing —
+and *contradicted*, because "What survives" listed "who noticed it" as route, and
+route gets overwritten. Adding a marker without amending that rule would have left
+a cleanup session correctly stripping it. Hence the carve-out: who *noticed* is
+route, who *decided* is authority, and authority passes the forward test because it
+decides whether the next session may revise the entry at all.
+
+### An unmarked decision is `held`, not a default
+
+The obvious shape was "unmarked defaults to protected". Naming the third state
+instead makes it visible and countable, so an unmarked entry cannot quietly harden
+into something indistinguishable from a `mandate`. `held` is settled **when it is
+actually in the way**, with the user, one entry at a time — never as a bulk pass,
+which would have a session guessing at precisely what the marker exists to stop it
+guessing at. The cost of an unsettled entry nobody has bumped into is zero, and it
+is paid by whoever bumps into it.
+
+The guard that carries the whole design is that **inferred intent is not a
+mandate.** Without it, "the user would want this" marks itself `mandate`, the
+protected tier swallows the file, and the distinction is back to one level.
 
 ### The gauge covers `GRAPH.md` and `notes/` together
 
@@ -130,6 +182,17 @@ the workspace is meant to prevent. Narrowing live to *design decisions and the
 criteria behind them* gives the category an edge. Deployment procedures,
 structural surveys and analysis guides belong to the code, so they go to the
 project repo, which `notes/`'s overflow rule already said.
+
+### A user's mandate cannot live only in `docs/design/`
+
+`design/` is live and revisable by rule — `revise_when` fires when the code
+changes. A criterion the user fixed stops holding only when the user says so, so a
+session correctly applying the revision rule would carry it off without noticing
+there was anything to notice. Keeping the mandate in `notes/decisions.md` and
+having the design document name that entry lets `revise_when` fire on the design
+without touching what the user fixed. The alternative — a second authority marker
+inside design documents — would put the same rule in two schemas, and the one that
+is not read every session is the one that goes stale.
 
 ### `GRAPH.md`'s entries are free prose
 
@@ -256,6 +319,30 @@ that reads like a status is just a sentence.
 The corpus is written in the user's language. Declaring the marker once per file
 is cheaper and more honest than a parser that knows how to say "why" in every
 language.
+
+### The authority token sits in the heading
+
+Same reasoning as `why_marker`, one level up in stakes: putting the token in a
+fixed position is what makes "who may revise this" checkable, so a tool can show
+which entries are `held`. A missing `why` costs a re-derivation; a missing
+authority costs either a reversed mandate or a frozen guess. The vocabulary is
+declared per file for the same reason `why_marker` is.
+
+### A workspace's pointer to a template has to resolve from the workspace
+
+**2026-09-01.** Three independent sessions working in a workspace, without the
+skill loaded, all hit the same wall: `CLAUDE.md` and the notes told them to copy a
+template from `templates/document/`, and no such path exists relative to a
+workspace — the templates live in the skill. What they did instead was **invent
+the frontmatter**: one wrote `csync: doc/1` and a `kind:` key onto a design
+document, where the real schema is `design/1` with no `kind`. The instruction
+"copy the template, do not rebuild the header from memory" was already there and
+could not be obeyed, and an unobeyable instruction is worse than none, because the
+session substitutes its best guess and reports success.
+
+The fix is the resolvable path, not a copy of the templates inside each workspace —
+a second copy of the canon is the thing this repo has already watched drift once.
+The same reasoning applies to every pointer a workspace file makes into the skill.
 
 ### Conformance is part of the format
 

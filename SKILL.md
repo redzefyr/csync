@@ -798,7 +798,8 @@ it, and every subcommand then fails on a missing pointer.
 # References
 
 - `references/workspace.md` — how a workspace is organised: `GRAPH.md`, `plans/`,
-  `notes/`, `docs/`, the `## findings` hand-off, closing a pipeline, cleanup.
+  `notes/` and who may revise a decision, `docs/`, the `## findings` hand-off,
+  closing a pipeline, cleanup.
   **Read this before creating, renaming, filing or deleting any workspace
   document.**
 - `references/document-format.md` — what those documents **look like**: the YAML

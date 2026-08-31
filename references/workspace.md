@@ -5,7 +5,7 @@ The directories **have different lifetimes**, and that is what the split is for.
 | | what lives there | lifetime |
 |---|---|---|
 | `plans/` | **one pipeline = one file.** Work in progress or deliberately parked | **deleted** when it closes |
-| `notes/` | **decisions that must not be reversed** and **traps that are easy to step on**. Only what has to be in context no matter what you are doing | permanent, but **capped** |
+| `notes/` | **the standing choices, each carrying who may revise it** and **traps that are easy to step on**. Only what has to be in context no matter what you are doing | permanent, but **capped** |
 | `docs/design/` | **live** — design decisions and the criteria behind them | permanent, **revised** with the code |
 | `docs/archive/` | **archive** — experiment results, measurements, feasibility reviews, the judgment of that day | permanent, **never revised** |
 
@@ -15,8 +15,12 @@ read at the start of every session together with `notes/`**.
 This file says what each directory is **for**. What the documents **look like** —
 frontmatter keys, the `## findings` shape, the emoji vocabulary, what a tool may
 read — is `document-format.md`; read it before creating or editing a document, and
-**copy the template from `templates/document/` rather than rebuilding a header
-from prose.**
+**copy the template from `~/.claude/skills/csync/templates/document/` rather than
+rebuilding a header from prose.** ⚠️ **Write that path wherever a workspace file
+points at a template.** A bare `templates/document/` does not resolve from inside a
+workspace, so a session without this skill loaded cannot obey the instruction — and
+what it does instead is invent the frontmatter, which is machine-read and therefore
+wrong in a way nothing reports.
 
 ⚠️ **`rationale.md` is not part of this.** It holds the incidents these rules came
 out of, and is read **only when a rule is being changed** — never to do work.
@@ -27,6 +31,12 @@ out of, and is read **only when a rule is being changed** — never to do work.
 what a later session needs in order to keep or overturn the judgment. The route —
 what was tried first, what was searched, who noticed it, what the text said before
 it was corrected — moves nobody's next step, and unlike grounds it has no end.
+
+⚠️ **Who *decided* it is not route — it is the authority to overturn.** "Who
+noticed it" is route and goes; **who the decision belongs to** passes the forward
+test above, because it decides whether the next session may revise the entry at
+all. In `notes/decisions.md` that is the `authority_markers` token, and it survives
+every fold, every cleanup and every rewrite of the entry around it.
 
 **The test runs forward.** "Would it be a shame to lose this?" answers yes to
 everything. Ask instead **"does the next session read this line and do something
@@ -82,7 +92,7 @@ correcting a typo, touching it during cleanup — **none of those are progress.*
 Every plan opens with **YAML frontmatter** carrying `status`, `next` and
 `blocked`, so it can be judged without being opened; `status_note` carries the
 prose version **in the words of the session that did the work.** Copy
-`templates/document/plan.md`.
+`~/.claude/skills/csync/templates/document/plan.md`.
 
 - **A plan holds no finished sections** — a one-line conclusion, evidence pushed
   into `docs/archive/`. Folding them is a "Session end" step
@@ -98,7 +108,8 @@ prose version **in the words of the session that did the work.** Copy
 While running one pipeline you often find **something another pipeline needs to
 know**, and the one-per-session rule means you cannot go and fix it there. **Put
 it in the other plan as a `## findings` block**, copied from
-`templates/document/findings-entry.md`. ⚠️ **The position is exact** — a block in
+`~/.claude/skills/csync/templates/document/findings-entry.md`.
+⚠️ **The position is exact** — a block in
 any other shape reports **zero pending findings**, which is read as "nothing
 waiting"; `document-format.md` has the shape.
 
@@ -115,11 +126,22 @@ session that runs that pipeline.**
 - **In another repository, write the substance rather than a path** (the
   stand-alone rule in `SKILL.md`)
 
-**Folding them in is the first job of the session that starts that pipeline.**
+**Folding them in is the first job of the session that starts that pipeline** —
+before the plan's "next step", which a finding may already have made stale.
 Each finding ends one of three ways — **promoted into the body** (only then does it
 become a section and change the banner) · **moved to the backlog** · **rejected**
 (one line saying so, then delete). Once folded, the entry is gone; **a finding
 still sitting there is one that has not been judged.**
+
+⚠️ **Weighing a finding is not folding it.** Letting it change what you do and
+leaving the entry in place leaves no trace that it was judged, so the next session
+meets it and decides it again.
+
+**When the last entry goes, delete the block and the `⚠️ findings` marker on that
+plan's `GRAPH.md` entry** — a marker with no block behind it sends the next session
+looking for a hand-off that is not there. **The prose under the heading and the
+`KEEP THIS COMMENT` comment travel with the block**, because it lands in a plan
+whose session may never load this file.
 
 #### When the outlet will not open — **recommend it to the user**
 
@@ -142,9 +164,36 @@ premise** — that one is immediate, regardless of count.
 
 Only two things survive:
 
-1. **Decisions that must not be reversed** — write **why**: the ground that still
-   holds, not the route that reached it
+1. **The standing choices** — write **why**: the ground that still holds, not the
+   route that reached it, and **mark who may revise it**
 2. **Traps that are easy to step on** — prefer the ones that fail silently
+
+### A decision carries its authority
+
+A decision reached by working and a decision the user handed down read identically
+once written, and they are not the same thing. **Every `decisions` entry carries
+one of three tokens** — the vocabulary is declared per file as `authority_markers`
+(`document-format.md`), because the corpus is not written in English.
+
+- **`mandate`** — the user decided it, explicitly. **Raise it and let them decide**
+  when the work argues against it; never revise it yourself, and never quietly
+  route around it, which is the same reversal with the objection left unsaid.
+  ⚠️ **Inferred intent is not a mandate.** "They would want this" is a `judgment`,
+  and marking it `mandate` inflates the protected tier until nothing in the file
+  can move and the distinction stops meaning anything
+- **`judgment`** — Claude concluded it. **Revise it without asking once its ground
+  stops holding** — that is what writing the ground down is *for* — and say in the
+  session report that you did, and what changed
+- **`held`** — not settled, and how an **unmarked** entry reads. Treat it as a
+  `mandate`, and settle it **the first time it is actually in the way**: say it is
+  `held`, say which way you read it and why, and agree the marker with the user.
+  ⚠️ **Not a migration to run through the file** — a bulk pass would have you
+  guessing at exactly the thing the marker exists to stop you guessing at
+
+**Authority is not the writer's to choose between the first two.** A decision that
+came out of doing the work — including everything the closing table below routes
+into `notes/` — is a `judgment`. It becomes a `mandate` only when the user affirms
+it, and that is the one edit to a marker that needs no discussion.
 
 **One test decides entry — "would starting work without knowing this make you
 wrong?"** Yes → `notes`. No → somewhere else. **"Good to know" fails**, and that
@@ -183,6 +232,13 @@ one of them is corrected, not annotated.
 
 ⚠️ **Change a convention, revise the live docs in the same session.** Miss it and
 the next analysis runs on the old premise.
+
+⚠️ **`design/` is revisable by rule, so a user's mandate cannot live only here.**
+`revise_when` fires on the code changing; a mandate stops holding only when the
+user says so, and a session correctly applying the revision rule takes the mandate
+with it without noticing there was one. **The mandate goes in `notes/decisions.md`
+marked `mandate`, and the design document says in one line that it rests on that
+entry.**
 
 ## `GRAPH.md` — the entry point
 
@@ -254,7 +310,7 @@ Then distribute the contents:
 
 | what is in the finished plan | where it goes |
 |---|---|
-| a decision that must not be reversed, plus **why** | `notes/` |
+| a standing choice, plus **why** — marked `judgment`, since it came out of the work | `notes/` |
 | a trap that is easy to step on | `notes/` |
 | the **verdict** on a rejected option ("do not try this again") | one line in `notes/` |
 | the **numbers and experiments** behind that verdict | `docs/archive/` |
@@ -307,6 +363,13 @@ what is already there: a plan's leading blockquote becomes `status` /
 `status_note` / `next` / `blocked`, keeping the original wording. ⚠️ **Do not
 restate a status in your own words** — that is the one way this migration loses
 something, and it loses it invisibly.
+
+⚠️ **The same rule bounds the authority markers.** Adding `authority_markers` to a
+`decisions` file's frontmatter is a format migration and belongs here. **Assigning
+a marker to an existing entry is not** — there is nothing to move it from, so it
+would be a guess, and the entries stay `held` until the sessions that meet them
+settle them with the user. A cleanup run that marked the file would be inventing
+the one thing the marker exists to record.
 
 **1. Split live from finished.** A plan is live if *any* item in it is unstarted,
 not if it is mostly done. Check the actual state — grep the code, read the git log

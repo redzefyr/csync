@@ -19,6 +19,11 @@ is displayed, never dropped.
 
 ## plans — one per session
 
+⚠️ **An entry marked `⚠️ findings xN` has a hand-off waiting in its plan.** The
+session that takes that pipeline judges those entries — promote · backlog ·
+reject — and deletes them **before** the plan's "next step", which they may
+already have made stale. The marker goes when the last entry does.
+
 (none yet)
 
 ## docs — location is lifetime

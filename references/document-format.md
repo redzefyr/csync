@@ -99,7 +99,11 @@ appear once. A body sentence that happens to read like a status is just a senten
 ### `## findings` — exact in position
 
 ```markdown
-## findings — carried over from other work (fold these in when you start)
+## findings — carried over from other work (judge each, then delete it)
+
+Each entry gets one of three verdicts before this session's own work:
+**promote** into the body · **backlog** in `GRAPH.md` · **reject** in one line.
+Then the entry goes. An entry still sitting here reads as *not yet judged*.
 
 ### YYYY-MM-DD · found while working on <what>
 **Touches**: premise | next step | cost — one line
@@ -110,9 +114,14 @@ A few lines of body.
   blockquote**, not h3, not decorated before the word
 - every entry is **`### YYYY-MM-DD · <what>`**, at h3. Not a numbered list
 - the block ends at the next h1 or h2
+- **the prose between the heading and the first entry travels with the block**,
+  and so does the `KEEP THIS COMMENT` comment in the template. They are the only
+  instruction that reaches the session doing the folding — the block arrives in a
+  plan whose session may never load these rules
 
 ⚠️ **A block in any other shape is read as zero pending findings**, and zero reads
-as "nothing waiting". Copy `templates/document/findings-entry.md`.
+as "nothing waiting". Copy
+`~/.claude/skills/csync/templates/document/findings-entry.md`.
 
 ## `note/1`
 
@@ -122,6 +131,13 @@ csync: note/1
 kind: decisions
 why_marker: |
   Why.
+authority_markers:
+  mandate: |
+    mandate
+  judgment: |
+    judgment
+  held: |
+    held
 ---
 ```
 
@@ -129,6 +145,7 @@ why_marker: |
 |---|---|
 | `kind` | **`decisions` · `traps`** |
 | `why_marker` | the bold run that opens the reason paragraph, in this file's language — declared per file because the corpus is not written in English. Defaults to `Why.` |
+| `authority_markers` | `decisions` only. The three authority tokens, in this file's language, declared for the same reason `why_marker` is. The keys are fixed — **`mandate` · `judgment` · `held`** — and the values are what appears in an entry |
 
 **The body is a flat list of `##` entries, one entry per decision or trap.** No
 nesting: an entry that needs subsections is a `docs/` document with a one-line note
@@ -137,6 +154,14 @@ pointing at it.
 **A `decisions` entry must contain a paragraph opening with `why_marker` in bold.**
 That is what makes "a decision records why" checkable, so a tool can show which
 decisions have none.
+
+**A `decisions` entry's `##` heading ends in `(<date> · <authority>)`**, where
+the authority is one of that file's `authority_markers` values. That is what
+makes "who may revise this" checkable — the higher-stakes half, because a missing
+`why` costs a re-derivation while a missing authority costs either a reversed
+mandate or a frozen guess. ⚠️ **An entry with no authority token is `held`, never
+`judgment`** — reading an unmarked entry as Claude's own is how a user's decision
+gets revised without anyone choosing that, and it fails silently.
 
 ## `design/1` — live
 

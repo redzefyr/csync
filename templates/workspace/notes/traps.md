@@ -9,4 +9,5 @@ kind: traps
 just quietly produce a wrong answer. Decisions and their reasons go in
 [[decisions]].
 
-One flat list of `##` entries. Copy `templates/document/note-trap-entry.md`.
+One flat list of `##` entries. Copy
+`~/.claude/skills/csync/templates/document/note-trap-entry.md`.
