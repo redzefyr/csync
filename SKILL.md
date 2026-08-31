@@ -112,7 +112,10 @@ Bare `/csync` dispatches on how far along this machine is:
 
 1. `~/.claude/csync-repo` missing → **`setup`**
 2. installed, but this project root has no `$WS/` → **`init`**
-3. otherwise → **`sync`**
+3. otherwise → **`sync`** — which, in a session that has not yet opened a
+   pipeline in that project, ends in `list`. Bare `/csync` at session start is
+   therefore `pull → push → list`: the table is part of the answer, not an
+   extra
 
 `cleanup` is never the bare default — it has to be asked for by name, and
 neither are `open` or `config`: taking up a pipeline and changing a setting are
