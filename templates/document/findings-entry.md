@@ -13,7 +13,7 @@
     - the block ends at the next h1 or h2
 
   Paste this whole block into the OTHER plan, at the end, then leave a marker on
-  that plan's entry in GRAPH.md -- `⚠️ findings x2 (MM-DD)` is enough.
+  that plan's entry in GRAPH.md -- `⚠️ findings x2 (YYYYMMDD)` is enough.
 
   Do NOT raise that plan's advanced-date, do NOT rewrite its `next`, and do NOT
   add sections to its body. This block is a quarantine area; what comes first is

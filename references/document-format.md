@@ -187,14 +187,14 @@ what the file is. What is exact is the **skeleton**:
 
 ```markdown
 ## plans — <free prose subtitle>
-### [[slug]] · planned MM-DD → advanced MM-DD · **status**
+### [[slug]] · planned YYYYMMDD → advanced YYYYMMDD · **status**
 <free prose, emoji markers and all>
 
 ## docs — <free prose subtitle>
 ### design
 - [[slug]] `docs/design/<path>` — one line
 ### archive
-- [[slug]] MM-DD — one line
+- [[slug]] YYYYMMDD — one line
 
 ## notes — <free prose subtitle>
 - [[slug]] — one line
@@ -203,7 +203,7 @@ what the file is. What is exact is the **skeleton**:
 - one line
 
 ## closed pipelines
-- ~~[[slug]]~~ closed MM-DD `<commit>` — one-line conclusion
+- ~~[[slug]]~~ closed YYYYMMDD `<commit>` — one-line conclusion
 ```
 
 - **section headings are h2 and begin with a key from a closed set** —
@@ -215,6 +215,16 @@ what the file is. What is exact is the **skeleton**:
 Slugs resolve from filenames (`plans/<planned>-<advanced>-<slug>.md`, basename
 elsewhere), so a tool that also looked in `GRAPH.md` would be consulting a second
 authority that nothing keeps in step.
+
+**The filename's dates and `GRAPH.md`'s are `YYYYMMDD`**, so the two can be compared
+by eye. ⚠️ A dashed date *there* is **legacy, not deviating**: read it, say so, and
+leave the rename to `cleanup`. `workspace.md` has the reason for the fixed width.
+
+⚠️ **This does not reach into document bodies.** The `## findings` heading stays
+`### YYYY-MM-DD · <what>`, and so do dates in note entries and archive titles —
+they are read, not compared against a filename. Changing the findings shape would
+be the worst kind of edit: a block in any other shape counts as **zero** pending
+findings, so every existing hand-off would go silently missing.
 
 ⚠️ **The body under an entry stays free, deliberately.** Only the skeleton above is
 structure; everything else is rendered as written, and a line a tool cannot

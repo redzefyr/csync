@@ -282,7 +282,7 @@ you switch machines.
 .csync/
 ├── CLAUDE.md          how to work in this workspace
 ├── GRAPH.md           the entry point: live pipelines, next steps, backlog, closed work
-├── plans/             one pipeline = one file, <planned>-<advanced>-<slug>.md
+├── plans/             one pipeline = one file, YYYYMMDD-YYYYMMDD-<slug>.md
 ├── notes/
 │   ├── decisions.md   what must not be reversed, and why
 │   └── traps.md       what is easy to step on

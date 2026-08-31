@@ -266,7 +266,7 @@ csync 는 그 `memory` 디렉토리를 sync 저장소로 향하는 심볼릭 링
 .csync/
 ├── CLAUDE.md          이 작업 공간에서 일하는 방법
 ├── GRAPH.md           진입점: 살아 있는 파이프라인, 다음 한 걸음, 백로그, 닫힌 작업
-├── plans/             파이프라인 하나 = 파일 하나, <planned>-<advanced>-<slug>.md
+├── plans/             파이프라인 하나 = 파일 하나, YYYYMMDD-YYYYMMDD-<slug>.md
 ├── notes/
 │   ├── decisions.md   뒤집으면 안 되는 것과 그 이유
 │   └── traps.md       밟기 쉬운 것

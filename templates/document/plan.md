@@ -15,6 +15,7 @@ pairs: []
 
 <!-- Delete this comment once filled in.
   Filename: plans/<planned>-<advanced>-<slug>.md
+    both dates are YYYYMMDD, no separators -- e.g. 20260820-20260824-my-slug.md
     planned  = the day this pipeline was opened
     advanced = the day it last actually MOVED. Fixing a banner, correcting a
                typo, touching it during cleanup are NOT progress.

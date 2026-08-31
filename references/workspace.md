@@ -67,6 +67,15 @@ move with the code, so the reader already has them.
 plans/<planned>-<advanced>-<slug>.md     e.g. 20260820-20260824-search-index-rebuild.md
 ```
 
+**Both dates are `YYYYMMDD`, no separators**, and so is every date in `GRAPH.md`.
+The slug is whatever follows the two date fields, so the fixed width is what lets a
+name be split without guessing — and, more to the point, what makes a **malformed**
+one visible: `20260820-search-index-rebuild.md` is missing a date and fails on
+sight, while a dashed equivalent still consumes six fields and yields nonsense.
+
+⚠️ **Dashed dates are the old shape.** Read them, report them as legacy, and leave
+the rename to `cleanup` — the same treatment the old `csync:` kind names get.
+
 **The advanced-date is the day that pipeline actually moved.** Fixing a banner,
 correcting a typo, touching it during cleanup — **none of those are progress.**
 
