@@ -266,6 +266,31 @@ leaves this side pointing at a name that no longer exists, silently.
 session** — `grep -rn '<old-slug>'` over that workspace and the memory directory is
 the whole job.
 
+## Each workspace must stand alone
+
+`prj/<name>` branches are orphan histories. A path into another project's
+workspace resolves on your disk today and nowhere else — not on another machine,
+not in a session that opened only that project.
+
+So when one project's notes need something another project decided, **copy the
+substance in, with attribution and a date**. Do not link.
+
+```
+> 2026-08-21, carried over from the protocol-lib side:
+> `Entry` field numbers were renumbered — ship server first, then clients.
+```
+
+The cost is duplication that can drift. The alternative is worse: a session
+opened alone on that project reads a dangling reference, or reads a stale local
+note and concludes the work never happened. State the fact and its date rather
+than pointing at it.
+
+**Files inside the project repo are different** — the reader has those. Point at
+`PROTOCOL.md` or `README.md` freely; they travel with the code.
+
+When you notice one project's workspace describing work that has since shipped
+elsewhere, fix it in that project, not in the one you happen to be sitting in.
+
 ## Session start
 
 1. Read `notes/` and `GRAPH.md`
