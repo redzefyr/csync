@@ -202,12 +202,59 @@ category is most of the bulk.
 Over the budget, fold during that session. What overflows usually has a home
 already: the list of plans → `GRAPH.md`, conventions and procedures → the project
 repo's `PROTOCOL.md`/`README.md`, machines and environments → memory, build steps
-→ the workspace `CLAUDE.md`, measured numbers → `docs/archive/`.
+→ the workspace `CLAUDE.md`, measured numbers → `docs/archive/`, **an entry one
+routine, type or interface is the whole scope of → a comment at that code site.**
 
 ⚠️ **Folding means moving, not discarding.** Deleting a trap or its reasoning to
 hit a number turns this rule into a loss machine.
 
 Session notes, scratch and logs do not belong in `notes/`. Use a scratchpad.
+
+### When one code site is the whole scope, the code is the home
+
+**Ask where the reader is standing when they step on it.** A trap you can only
+meet by editing one routine, one type, one interface — or by calling it wrong
+from a site its signature already leads to — is caught by a comment there and
+missed by `notes/`. Nobody reads `notes/` *because* they opened that file; they
+read it at session start, before they know which files this session touches. The
+comment reaches the reader who is about to be wrong. The note charges every
+session in the project for the same context and reaches them by luck. **And it
+expires correctly**: a `notes/` entry about a routine that no longer exists sits
+there forever, because nothing checks — the comment goes when the routine goes.
+
+The same holds for a `judgment` in `decisions.md` when the choice is settled
+inside one implementation and nothing outside it can be wrong about it.
+
+It stays in `notes/` when there is no single site to hang it on:
+
+- it fires from **callers that never open the file** — a class of call sites, an
+  ordering constraint between two subsystems
+- it is about **code that is not there** — an approach not to try again, a
+  defence deliberately left out
+- it holds **across the project**, so a comment at one site would need a copy at
+  every other
+
+⚠️ **Write the comment and read it back before deleting the entry.** This fold
+crosses a repo boundary — a different clone, a different history — and run
+halfway it leaves nothing anywhere.
+
+⚠️ **Write it for someone reading the code, not for the next session.** The date,
+the slug, who found it, what was tried first: all route, and all of it reads as
+noise to whoever maintains that file, so it gets dropped in the next refactor and
+takes the trap with it. `[[slug]]` does not resolve there either. State what goes
+wrong and what to do instead, in the language and comment style of the code
+around it.
+
+⚠️ **A `mandate` does not move here, and neither does a `held`.** A comment is
+revised by anyone who touches that code, including someone with no access to the
+workspace — the same reason a mandate cannot live only in `docs/design/`. The
+entry stays in `notes/decisions.md`; the comment may restate it in one line.
+
+⚠️ **The diff is comments only, and it is reported.** This edits the project repo
+as a side effect of tidying the workspace, so say which files got comments and
+leave committing them to that repo's own rules — a `notes/` count that fell
+because unreported changes landed in the user's code is not the reduction they
+asked for.
 
 ## `docs/` — **location is lifetime**
 
@@ -337,6 +384,7 @@ Then distribute the contents:
 |---|---|
 | a standing choice, plus **why** — marked `judgment`, since it came out of the work | `notes/` |
 | a trap that is easy to step on | `notes/` |
+| either of those two, when **one routine, type or interface** is its whole scope | a comment at that code site |
 | the **verdict** on a rejected option ("do not try this again") | one line in `notes/` |
 | the **numbers and experiments** behind that verdict | `docs/archive/` |
 | measurements, instrumentation, comparison tables | `docs/archive/` |
@@ -428,10 +476,12 @@ stale untouched, because they encode assumptions the conventions have since
 changed. `docs/archive/` is not touched — an outdated passage there is marked "as
 of then", not corrected.
 
-**7. Notes — hold the principle** (in context every session). Only **decisions that must not be reversed** and
-**traps that are easy to step on** survive; over the budget, move things to their
-real homes. Session notes recording only what happened get discarded; anything
-recording a trap does not.
+**7. Notes — hold the principle** (in context every session). Only **decisions
+that must not be reversed** and **traps that are easy to step on** survive; over
+the budget, move things to their real homes — **including into the code itself**,
+for an entry one routine, type or interface is the whole scope of ("When one code
+site is the whole scope"). Session notes recording only what happened get
+discarded; anything recording a trap does not.
 
 **8. Check `GRAPH.md` against the actual tree** — the number of live pipelines,
 whether each slug resolves to a file that exists, whether the advanced-dates match

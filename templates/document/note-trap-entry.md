@@ -15,5 +15,11 @@
 
   Write what to avoid, not how it was discovered.
 
+  BEFORE PASTING: if one routine, type or interface is the whole scope of this
+  trap, it belongs in a comment at that code site instead -- that comment reaches
+  the person about to be wrong, and goes when the code goes. notes/ is for what
+  fires from callers that never open the file, from code that is not there, or
+  across the whole project.
+
   Rules: references/workspace.md ("notes/")
 -->

@@ -40,6 +40,12 @@ invented key is taken for a real one, and nothing reports the difference.
 - `notes/` — `decisions` (the standing choices) and `traps` (what is easy to
   step on), and nothing else. It is loaded every session, so keep it small
   (gauge: 500 lines, `GRAPH.md` and `notes/` together).
+  ⚠️ **An entry that one routine, type or interface is the whole scope of goes
+  in a comment at that code site, not here** — a comment reaches whoever is
+  about to be wrong and dies with the code, while `notes/` is read at session
+  start, before anyone knows which files this session touches. Write the comment
+  and read it back before deleting the entry, and report which files you
+  commented. A `mandate` or `held` decision does not move this way.
   ⚠️ **Every `decisions` entry carries an authority marker and it is binding**:
   `mandate` is the user's — raise it and let them decide, never revise it
   yourself; `judgment` is Claude's — revise it once its ground stops holding;

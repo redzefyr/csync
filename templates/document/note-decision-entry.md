@@ -33,5 +33,11 @@
   test decides entry: "would starting work without knowing this make you wrong?"
   "Good to know" fails, and that category is most of the bulk.
 
+  A `judgment` settled inside ONE routine, type or interface, that nothing
+  outside it can be wrong about, belongs in a comment at that code site instead
+  of here. `mandate` and `held` stay in this file -- a comment is revised by
+  anyone who touches that code, including someone with no access to the
+  workspace.
+
   Rules: references/workspace.md ("notes/")
 -->
