@@ -193,10 +193,14 @@ First-run wiring, and the one command that touches files the user did not ask yo
 to touch — it moves their real `~/.claude/CLAUDE.md` into a git repo and leaves a
 symlink behind. **Nothing in it happens silently.**
 
-Procedure in `references/setup.md`. Do not improvise a shorter version: it asks
-where the repo lives and how it syncs, runs the privacy gate before adopting
-anything, settles `csync.conf` **before** installing, and dry-runs `install.sh`
-before the real run. It ends by pointing at `/csync init`.
+⚠️ **Two things reach the user before anything is adopted, whatever else the
+answer covers**: the remote is *verified* private rather than asked about, and
+`install.sh` is dry-run first with its plan shown. A setup that reports neither
+has broken the promise above even if the run itself was correct.
+
+Procedure in `references/setup.md`. Do not improvise a shorter version — it also
+asks where the repo lives and how it syncs, and settles `csync.conf` **before**
+installing. It ends by pointing at `/csync init`.
 
 ## /csync init [name]
 
