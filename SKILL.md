@@ -130,14 +130,20 @@ plus any others. **Every subcommand except `init` covers all of them that have a
 workspace**, not just `$PWD`. Missing the second one is the common failure — its
 notes quietly fall a session behind and the next reader trusts them.
 
-`csync-push.sh` covers one project by design, so run it once from each root. It
-finds that project by **walking up from `$PWD`** for the directory holding
-`$WS/.git`, so running it from inside the workspace or from a source
-subdirectory works. `pull` already traverses the whole registry, which is wider
-and safe: fast-forward never touches uncommitted local work.
+Both halves cover **one project per run**, so run each once from each root. They
+find that project the same way — by **walking up from `$PWD`** for the directory
+holding `$WS/.git` — so running either from inside the workspace or from a source
+subdirectory works. One rule for both directions.
 
-The write-side commands are deliberately *not* registry-wide. A project this
-session never opened may hold half-done work from another window.
+⚠️ **The SessionStart hook only ever covers the root it was handed.** A second
+root is not fast-forwarded until something runs `pull` there, so pull it *before*
+reading its notes, not after. Nothing warns you — a stale note reads exactly like
+a current one.
+
+Neither half touches a project this session never opened. On the write side that
+would commit half-done work from another window. On the read side it was merely
+harmless, and harmless is a permission, not a reason: a clone nobody commits in
+cannot drift, and the session that opens it pulls it then.
 
 ## When `install.sh` must be re-run
 
@@ -341,12 +347,13 @@ project roots** that has a workspace.
 ## /csync pull
 
 The pull half alone. Run `$TOOL/scripts/csync-pull.sh`; it fast-forwards `$REPO`
-and every project in `~/.claude/csync-projects` that still has a workspace clone.
-It also fetches the tool repo and prints one line when that clone is cleanly
-behind — it never merges that one; see `update`.
+and this project's workspace clone — the same one project `push` covers, resolved
+the same way, so a session's two halves always mean the same clone. It also
+fetches the tool repo and prints one line when that clone is cleanly behind — it
+never merges that one; see `update`.
 A diverged history is reported as `DIVERGED`, never as "offline" — see
-`references/divergence.md`. Pulling other projects' clones is safe because
-fast-forward never touches uncommitted local work.
+`references/divergence.md`. There is no sweep and no flag for one: to cover a
+second project, run it from that root.
 
 ## /csync push
 
@@ -359,10 +366,16 @@ retries a rejected push once via fast-forward, and refuses to commit at all when
 the clone is already diverged.
 
 Registry note: `~/.claude/csync-projects` is machine-local (absolute project
-roots, one per line), maintained by the hook and the push script. Pull traverses
-every entry; push stays scoped to the one project it resolved from `$PWD` — and
-it registers **that resolved root**, never the subdirectory you happened to be
-standing in. Entries whose workspace disappeared are pruned by the hook.
+roots, one per line) and **append-only** — `pull`, `push` and `init` add to it,
+and nothing removes a line. Push registers **the root it resolved**, never the
+subdirectory you happened to be standing in.
+
+It is not what makes a project sync; both halves resolve their project from
+`$PWD` and neither reads this file. Its reader is `/csync remote`, which has to
+repoint *every* clone on the machine — so it needs a list that errs long rather
+than short, and a line whose workspace is gone costs it nothing. ⚠️ **Do not
+prune it.** The sweep that used to do so dropped projects on unmounted disks for
+good, because nothing re-adds a root except working in it.
 
 ## /csync cleanup
 

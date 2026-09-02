@@ -1,14 +1,23 @@
 #!/usr/bin/env bash
 # The pull half of sync, and the SessionStart hook.
 #
-# Fast-forwards the sync repo and every registered project's workspace clone.
+# Fast-forwards the sync repo and this session's project workspace clone.
 # Never blocks the session on failure: an unreachable remote is normal.
 #
 # The tool repo is fetched but never merged -- see check_tool_update below.
 #
-# Projects are tracked in a machine-local registry (one absolute project root
-# per line). The current project registers itself here; entries whose
-# workspace clone disappeared are pruned.
+# Scope mirrors the push half: the sync repo and *one* project, resolved by the
+# same csync_project_root. A session holding more than one project root runs
+# this once from each, exactly as it runs the push half -- one rule for both
+# directions instead of one each.
+#
+# It used to fast-forward every clone in the registry. Fast-forward cannot touch
+# uncommitted work, so that was safe -- but safe is a permission, not a purpose.
+# A split only grows where this machine commits, and it only commits where you
+# are working, so the sweep bought early warning of something that was not
+# getting worse, and charged a network fetch per idle clone to every session
+# start. It also pruned as it walked, which is the part that did damage; see
+# csync_remember_project in lib.sh.
 #
 # Divergence is reported as its own thing, never folded into "offline". The
 # two need opposite responses -- an unreachable remote fixes itself on the next
@@ -102,21 +111,17 @@ check_tool_update() {
 pull_one "$REPO_ROOT" "sync repo"
 check_tool_update
 
+# The project this run is for. $CLAUDE_PROJECT_DIR is what the SessionStart hook
+# is handed; $PWD covers being invoked from a root directly, and walking up from
+# it covers standing inside the workspace or in a source subdirectory.
 if [ -n "${CLAUDE_PROJECT_DIR:-}" ] && [ -e "$CLAUDE_PROJECT_DIR/$WS/.git" ]; then
-  touch "$CSYNC_REGISTRY"
-  grep -qxF "$CLAUDE_PROJECT_DIR" "$CSYNC_REGISTRY" \
-    || echo "$CLAUDE_PROJECT_DIR" >> "$CSYNC_REGISTRY"
+  ROOT="$CLAUDE_PROJECT_DIR"
+else
+  ROOT="$(csync_project_root "$PWD")" || ROOT=""
 fi
 
-if [ -f "$CSYNC_REGISTRY" ]; then
-  tmp="$(mktemp)"
-  while IFS= read -r dir; do
-    [ -n "$dir" ] || continue
-    if [ -e "$dir/$WS/.git" ]; then
-      echo "$dir" >> "$tmp"
-      pull_one "$dir/$WS" "${dir#"$HOME"/}/$WS"
-    fi
-  done < "$CSYNC_REGISTRY"
-  mv "$tmp" "$CSYNC_REGISTRY"
+if [ -n "$ROOT" ]; then
+  csync_remember_project "$ROOT"
+  pull_one "$ROOT/$WS" "${ROOT#"$HOME"/}/$WS"
 fi
 exit 0

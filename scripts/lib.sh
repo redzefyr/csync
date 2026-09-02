@@ -8,12 +8,50 @@
 # is exactly why they live outside the synced repo.
 CSYNC_POINTER="$HOME/.claude/csync-repo"      # symlink -> the sync repo root
 CSYNC_TOOL_POINTER="$HOME/.claude/csync-tool"  # symlink -> the tool repo root
-CSYNC_REGISTRY="$HOME/.claude/csync-projects"  # one project root per line
+CSYNC_REGISTRY="$HOME/.claude/csync-projects"  # one project root per line, append-only
 
 # Absolute, symlink-resolved path of a directory. `readlink -f` is missing on
 # older BSD userlands; `cd -P` is portable back to bash 3.2.
 csync_abspath() {
   (cd -P "$1" 2>/dev/null && pwd)
+}
+
+# The project root a command should act on: the innermost ancestor of $1 that
+# holds a workspace clone. Callers pass $PWD.
+#
+# $PWD itself is not enough. A session that has just edited a note is sitting
+# *inside* the workspace, and a session working on code is often in a
+# subdirectory; both used to fall through this check and skip the workspace
+# **without saying so**, printing only the sync-repo line. That reads as
+# success, so the note stays local and the next machine reads the old one.
+#
+# Both halves of sync resolve their project through this, so a session's pull
+# and its push always mean the same clone.
+#
+# Needs $WS in scope, so call it after csync_workspace.
+csync_project_root() {
+  local dir="$1"
+  while :; do
+    [ -e "$dir/$WS/.git" ] && { printf '%s\n' "$dir"; return 0; }
+    [ "$dir" = "/" ] && return 1
+    dir="$(dirname "$dir")"
+  done
+}
+
+# Record a project root in the machine-local registry.
+#
+# **Append only. Nothing here removes a line, and nothing should.** The
+# registry's one reader inside csync is `/csync remote`, which repoints every
+# clone on this machine after the sync repo moves; a clone it misses keeps
+# working until the day it does not. That reader needs a *superset*, and a line
+# for a project that is gone costs it nothing -- the path simply is not there.
+#
+# The pull sweep used to prune while it walked, which is the opposite trade: a
+# project on a disk that happened to be unmounted dropped out silently, and
+# nothing ever put it back, because only working in a project adds it.
+csync_remember_project() {
+  touch "$CSYNC_REGISTRY"
+  grep -qxF "$1" "$CSYNC_REGISTRY" || echo "$1" >> "$CSYNC_REGISTRY"
 }
 
 # Print the sync repo root, or fail when csync is not installed on this

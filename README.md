@@ -243,8 +243,8 @@ history and the same workflow with nothing leaving the machine and no account
 anywhere. The document discipline is the point; syncing is optional.
 
 **Two or more machines.** The same, plus your global `CLAUDE.md`, your per-project
-memory, and every project workspace fast-forwarded at the start of each session
-and pushed when you finish.
+memory, and the workspace of whichever project you are in — fast-forwarded at the
+start of each session and pushed when you finish.
 
 You can start local-only and add a remote later — `/csync remote <url>` does the
 migration.
@@ -377,7 +377,7 @@ workspace take effect.
 ├── skills/csync/              this skill (a clone of this repo, or a link to one)
 ├── csync-tool   -> ~/.claude/skills/csync      pointer, machine-local
 ├── csync-repo   -> ~/.csync                    pointer, machine-local
-├── csync-projects                              registry of connected projects
+├── csync-projects                              append-only list of connected projects
 ├── CLAUDE.md    -> ~/.csync/global/CLAUDE.md   symlink
 ├── settings.json                               gains one SessionStart hook
 └── projects/<key>/memory -> ~/.csync/global/memory/<key>   symlink
@@ -538,8 +538,8 @@ untracked in the project repo and no project `.gitignore` has to mention it.
 | `/csync update` | update the skill itself and report what changed |
 | `/csync uninstall` | unwire this machine, leaving real files behind |
 
-In practice you rarely type any of these. A SessionStart hook fast-forwards
-everything when a session opens, and Claude runs `sync` on its own after writing
+In practice you rarely type any of these. A SessionStart hook fast-forwards this
+project when a session opens, and Claude runs `sync` on its own after writing
 notes or wrapping up work — reporting it as a single line, because it is
 plumbing.
 
@@ -688,10 +688,18 @@ lost in the meantime — your uncommitted work stays in the working tree.
   misread it (GitHub shows meaningless ahead/behind counts, IDEs offer to merge);
   the branches are never merged or rebased into each other, and everything is
   fast-forward only.
-- **Pull is registry-wide, push is `$PWD`-scoped.** Fast-forwarding every known
-  clone is safe — it cannot touch uncommitted work — but committing on another
+- **Both directions are scoped to the project you are in.** Committing on another
   project's behalf could easily commit half-done work from a session still running
-  in another window.
+  in another window. Pulling one carried no such risk — fast-forward cannot touch
+  uncommitted work — but harmless is a permission, not a reason: a clone nobody
+  commits in cannot drift, and the session that opens it pulls it then. Sweeping
+  them all charged a network fetch per clone to every session start, for a warning
+  about nothing.
+- **The list of connected projects is append-only.** Nothing removes a line from
+  `~/.claude/csync-projects`. Its job is to tell `/csync remote` which clones to
+  repoint after your sync repo moves, and a clone missed there keeps working until
+  the day it does not — so the list has to err long. It used to be pruned as the
+  old sweep walked it, which dropped a project on an unmounted disk for good.
 - **A divergence is reported as its own thing, never as "offline".** The two need
   opposite responses: an unreachable remote fixes itself next run, while a split
   gets worse every time sync commits over it.

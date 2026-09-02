@@ -3,9 +3,9 @@
 #
 # Commits and pushes pending changes in the sync repo and, when run inside a
 # project that has one, its workspace clone. Only $PWD's clone is pushed --
-# other registered projects may hold half-done work from a session still
-# running there -- but $PWD is registered so the SessionStart hook's pull
-# traversal covers it (see csync-pull.sh).
+# another project may hold half-done work from a session still running there.
+# The pull half is scoped the same way and resolves the root the same way, so a
+# session's two halves always mean the same clone (see csync-pull.sh).
 set -uo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -81,31 +81,15 @@ push_repo() {
   fi
 }
 
-# Walk up from $PWD for the project root -- the directory holding $WS/.git.
-#
-# $PWD itself is not enough. A session that has just edited a note is sitting
-# *inside* the workspace, and a session working on code is often in a
-# subdirectory; both used to fall through this check and skip the workspace
-# **without saying so**, printing only the sync-repo line. That reads as
-# success, so the note stays local and the next machine reads the old one.
-#
-# Still one project per run -- the innermost match wins, and other registered
-# projects are deliberately left alone (see the header).
-project_root() {
-  local dir="$1"
-  while :; do
-    [ -e "$dir/$WS/.git" ] && { printf '%s\n' "$dir"; return 0; }
-    [ "$dir" = "/" ] && return 1
-    dir="$(dirname "$dir")"
-  done
-}
+# One project per run -- the innermost match wins, and other projects are
+# deliberately left alone (see the header). csync_project_root is in lib.sh
+# because the pull half resolves its scope with the same function.
 
 status=0
 push_repo "$REPO_ROOT" "sync repo" || status=1
 
-if ROOT="$(project_root "$PWD")"; then
-  touch "$CSYNC_REGISTRY"
-  grep -qxF "$ROOT" "$CSYNC_REGISTRY" || echo "$ROOT" >> "$CSYNC_REGISTRY"
+if ROOT="$(csync_project_root "$PWD")"; then
+  csync_remember_project "$ROOT"
   push_repo "$ROOT/$WS" "$WS" || status=1
 fi
 exit "$status"

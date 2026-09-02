@@ -209,8 +209,10 @@ project directory's basename. Refuse if `$WS/` already exists.
    `GRAPH.md` and both `notes/` files are created **even though they are empty**.
    Without `GRAPH.md` the next session has no entry point, and the place it gets
    improvised is `notes/`.
-4. Register the project root in `~/.claude/csync-projects` (append `$PWD` if not
-   already listed) so the SessionStart pull covers it from any session.
+4. Append the project root to `~/.claude/csync-projects` if it is not already
+   listed. This is **not** what makes the project sync — both halves resolve
+   their project from `$PWD`. It is the list `/csync remote` repoints, and it is
+   append-only: add to it, never remove from it.
 5. Detect the project's languages and record which language servers are
    available — see `references/lsp.md`.
 6. Confirm the project repo ignores it: `git check-ignore -q "$WS"` must succeed.
@@ -240,12 +242,17 @@ The bare repo already holds every branch, so it is the thing to publish:
 git -C <repo>.git push --mirror <url>          # needs the user's yes
 ```
 
-Then repoint every clone — the sync repo and each registered project's
-workspace:
+Then repoint every clone — the sync repo and each project workspace the registry
+names. Missing one leaves it pointed at the old location, where it goes on
+working until the day it does not; needing a list that errs long is why that file
+is append-only:
 
 ```bash
 git -C "$REPO" remote set-url origin <url>
-git -C "<project>/$WS" remote set-url origin <url>
+while read -r root; do
+  [ -e "$root/$WS/.git" ] || continue   # listed, not on this disk: skip, keep the line
+  git -C "$root/$WS" remote set-url origin <url>
+done < ~/.claude/csync-projects
 ```
 
 `--mirror` can delete refs on the target, so it is only safe into an **empty**
