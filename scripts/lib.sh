@@ -3,6 +3,14 @@
 #
 # Portability: macOS ships bash 3.2, so nothing here may use associative
 # arrays, `readlink -f`, `mapfile`, or `${var^^}`.
+#
+# It is also sourced by shells other than bash. The scripts here all run under
+# bash, but a session follows SKILL.md by calling these helpers from its own
+# shell, and that shell is whatever the user's login shell is — zsh, on a stock
+# Mac. So nothing here may depend on bash-only parsing. Brace every expansion
+# that is followed by `[`: zsh reads `$key[...]` as an array subscript, the
+# command substitution dies, and the caller gets the default back through the
+# ordinary path with nothing to show that it failed.
 
 # Machine-local state. Both are absolute paths that differ per machine, which
 # is exactly why they live outside the synced repo.
@@ -86,7 +94,7 @@ csync_tool() {
 # a config file that can run arbitrary code.
 csync_conf() {
   local repo="$1" key="$2" default="$3" value
-  value="$(sed -n "s/^[[:space:]]*$key[[:space:]]*=[[:space:]]*//p" \
+  value="$(sed -n "s/^[[:space:]]*${key}[[:space:]]*=[[:space:]]*//p" \
     "$repo/csync.conf" 2>/dev/null | sed 's/[[:space:]]*$//' | tail -1)"
   if [ -n "$value" ]; then
     printf '%s' "$value"
