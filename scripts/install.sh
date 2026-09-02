@@ -193,7 +193,13 @@ fi
 # Store repo dirs keyed relative to $HOME instead (dev-foo), so machines with
 # different usernames resolve to the same repo directory. Projects outside
 # $HOME keep their full mangled key and need identical paths on both machines.
-HOME_KEY="$(printf '%s' "$HOME" | tr '/.' '--')"
+# The set of characters must match Claude's mangling exactly. A '/' or '.' in
+# $HOME was covered from the start; a space was not, and a $HOME containing one
+# ("/Users/First Last") then produced a HOME_KEY that no project key begins
+# with. Every project on that machine would fall through to its full mangled
+# key -- silently giving up the username-independence this whole block exists
+# for, and splitting one project into two memory directories across machines.
+HOME_KEY="$(printf '%s' "$HOME" | tr '/. ' '---')"
 
 # A mangled key can never contain '.', because mangling is what turns '.' into
 # '-'. That makes a leading "home." an unambiguous marker, and it is needed for
