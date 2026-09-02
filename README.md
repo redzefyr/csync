@@ -208,10 +208,11 @@ you). Adjust `.csync/` if you renamed the workspace directory:
   by then — a cap with the wrong number, a directory that had been retired. Do not
   paste one back in for convenience.
 - Claude decides when to sync: after writing memory or a `.csync/` note, when
-  wrapping up work. Report it as **one line** — "pulled and pushed" — and raise
-  anything that needs me, such as a diverged history or a push that failed after
-  its retry, immediately. **This applies to a session that only ran the script,
-  with the skill never loaded.**
+  wrapping up work, run `/csync sync` (or
+  `~/.claude/skills/csync/scripts/csync-sync.sh`). Report it as **one line** —
+  "pulled and pushed" — and raise anything that needs me, such as a diverged
+  history or a push that failed after its retry, immediately. **This applies to a
+  session that only ran the script, with the skill never loaded.**
 ```
 
 #### What changes once it is in
@@ -443,8 +444,8 @@ will ever open it. The full text is in
 
 Claude Code keeps per-project memory — short files it writes about you, the
 project, and the decisions you have made — under `~/.claude/projects/`. Each
-project gets its own directory, named after the project's absolute path with `/`
-and `.` replaced by `-`:
+project gets its own directory, named after the project's absolute path with `/`,
+`.` and spaces all replaced by `-`:
 
 ```
 ~/dev/acme-api   ->   ~/.claude/projects/-Users-ann-dev-acme-api/memory/
@@ -527,7 +528,7 @@ untracked in the project repo and no project `.gitignore` has to mention it.
 |---|---|
 | `/csync` | dispatches: `setup` if not installed, `init` if this project is not connected, otherwise `sync` |
 | `/csync init [name]` | connect the current project — creates `.csync/` on branch `prj/<name>` |
-| `/csync sync` | pull everything, then commit and push |
+| `/csync sync` | pull, then commit and push — the sync repo and this project |
 | `/csync list` | the open pipelines as a table — status and waiting findings |
 | `/csync open [slug]` | take one up for this session — folds its findings in, renames the session |
 | `/csync status` | git status for the sync repo and this session's workspaces |
@@ -652,7 +653,7 @@ guarantee that you are current.
 
 replaces the symlinks holding your own content — the global `CLAUDE.md` and every
 memory directory — with real copies, so nothing disappears afterwards. The links
-that are only wiring are removed outright: the pointers, the registry, the hook,
+that are only wiring are removed outright: the pointers, the project list, the hook,
 the `bin/` wrappers and the skill link. **The sync repo, your project workspaces
 and the skill's own clone are left where they are** — deleting those is your call.
 Run it with `--dry-run` first; the skill does.
@@ -676,6 +677,13 @@ common ancestor. The scripts stop rather than commit on top of it, because a spl
 committed over gets one commit deeper every run. Ask Claude to resolve it; the
 procedure is in [`references/divergence.md`](references/divergence.md). Nothing is
 lost in the meantime — your uncommitted work stays in the working tree.
+
+**Notes I wrote on the other machine are not here.** For a *project* workspace
+this is usually scope, not a fault: the session-start pull covers the project the
+session was opened in, and nothing else. Open a session in that project — or run
+`/csync pull` from its root — and it catches up. Your global `CLAUDE.md` and
+memory are different: those sync from any session, so if *they* are behind, look
+for a `DIVERGED` line and check that the other machine actually pushed.
 
 **The session-start pull stopped running.** The hook entry is gone from
 `~/.claude/settings.json`. Re-run the installer.

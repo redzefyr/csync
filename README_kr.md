@@ -46,7 +46,7 @@ Claude Code 스킬. 원한다면 그 작업 공간과 Claude 의 글로벌 설�
 git clone https://github.com/redzefyr/csync.git ~/.claude/skills/csync
 ```
 
-이 경로가 `/csync` 를 명령으로 만든다. Claude Code 는 `~/.claude/skills` 아래에서만
+이 경로가 `/csync` 를 명령으로 만든다. Claude Code 는 `~/.claude/skills` 아래에서
 스킬을 찾기 때문이다. clone 될 위치를 직접 지정하고 싶다면 거기에 clone 하고
 링크만 걸면 된다 — 스크립트는 전부 자기 포인터로 해석하므로 링크만 있으면 된다:
 
@@ -280,7 +280,7 @@ git -C ~/.claude/skills/csync remote add upstream https://github.com/redzefyr/cs
 git clone https://github.com/redzefyr/csync.git ~/.claude/skills/csync
 ```
 
-이 경로는 임의가 아니다. Claude Code 는 `~/.claude/skills` 아래에서만 스킬을 찾고,
+이 경로는 임의가 아니다. Claude Code 는 `~/.claude/skills` 아래에서 스킬을 찾고,
 `/csync` 를 명령으로 만드는 것은 그 링크 하나뿐이다. 나머지는 이 경로에 의존하지
 않으므로 — 스크립트는 전부 포인터를 통해 해석한다 — clone 은 저장소를 모아두는 곳
 어디에 둬도 되고, 거기서 링크만 걸려 있으면 된다. 첫 설치에서는 링크를 직접 만든다.
@@ -398,7 +398,7 @@ Claude Code 가 알지 못하는 디렉토리 안을 들여다볼 이유가 없�
 
 Claude Code 는 프로젝트별 메모리 — 사용자와 프로젝트, 내려진 결정에 대해 스스로
 기록하는 짧은 파일들 — 를 `~/.claude/projects/` 아래에 둔다. 프로젝트마다 디렉토리
-하나를 갖고, 이름은 프로젝트의 절대 경로에서 `/` 와 `.` 를 `-` 로 바꾼 것이다:
+하나를 갖고, 이름은 프로젝트의 절대 경로에서 `/`·`.`·공백을 `-` 로 바꾼 것이다:
 
 ```
 ~/dev/acme-api   ->   ~/.claude/projects/-Users-ann-dev-acme-api/memory/
@@ -479,7 +479,7 @@ archive 는 영구적이되 개정되지 않는다. 섞어 두면 무엇을 판�
 |---|---|
 | `/csync` | 상태에 따라 분기: 미설치면 `setup`, 미연결 프로젝트면 `init`, 그 외에는 `sync` |
 | `/csync init [name]` | 현재 프로젝트 연결 — `prj/<name>` 브랜치에 `.csync/` 생성 |
-| `/csync sync` | 전체 pull 후 커밋·push |
+| `/csync sync` | pull 후 커밋·push — sync 저장소와 이 프로젝트 |
 | `/csync list` | 열려 있는 파이프라인을 표로 — 상태와 대기 중인 findings |
 | `/csync open [slug]` | 이 세션이 그 파이프라인을 맡는다 — findings 를 접어 넣고 세션 제목을 바꾼다 |
 | `/csync status` | sync 저장소와 이 세션의 작업 공간들에 대한 git status |
@@ -491,8 +491,8 @@ archive 는 영구적이되 개정되지 않는다. 섞어 두면 무엇을 판�
 | `/csync uninstall` | 이 머신의 연결을 해제하고 실제 파일을 남긴다 |
 
 실제로는 이 중 어느 것도 직접 칠 일이 드물다. 세션이 열릴 때 SessionStart hook 이
-이 프로젝트를 fast-forward 하고, Claude 가 노트를 쓴 뒤나 작업을 마무리할 때 알아서 `sync` 를
-돌린 다음 **한 줄로만 보고한다** — 배관 작업이기 때문이다.
+이 프로젝트를 fast-forward 하고, Claude 가 노트를 쓴 뒤나 작업을 마무리할 때 알아서
+`sync` 를 돌린 다음 **한 줄로만 보고한다** — 배관 작업이기 때문이다.
 
 `cleanup` 은 예외다. 문서를 삭제하고 판단을 내리므로 **이름을 지목해 요청할 때만**
 실행된다.
@@ -595,7 +595,7 @@ pull 만으로는 적용되지 않는 것도 함께 짚는다. `SKILL.md` 나 `r
 
 사용자 자신의 내용을 담은 심볼릭 링크 — 글로벌 `CLAUDE.md` 와 각 메모리 디렉토리 — 는
 가리키던 것의 실제 사본으로 교체하므로 이후 아무것도 사라지지 않는다. 배선에 지나지
-않는 링크는 그대로 제거한다: 포인터·레지스트리·hook·`bin/` 래퍼·스킬 링크. **sync
+않는 링크는 그대로 제거한다: 포인터·프로젝트 목록·hook·`bin/` 래퍼·스킬 링크. **sync
 저장소와 프로젝트 작업 공간, 그리고 스킬 자신의 clone 은 그대로 둔다** — 그것을 지우는
 것은 사용자의 판단이다. `--dry-run` 을 먼저 실행한다. 스킬은 그렇게 한다.
 
@@ -617,6 +617,12 @@ pull 만으로는 적용되지 않는 것도 함께 짚는다. `SKILL.md` 나 `r
 때마다 한 커밋씩 더 깊어지기 때문이다. Claude 에게 해결을 요청한다. 절차는
 [`references/divergence.md`](references/divergence.md) 에 있다. 그동안 잃는 것은 없다 —
 커밋하지 않은 작업은 작업 트리에 그대로 있다.
+
+**다른 머신에서 쓴 노트가 여기 없다.** *프로젝트* 작업 공간이라면 대개 고장이 아니라
+범위 문제다. 세션 시작 pull 은 그 세션이 열린 프로젝트만 덮는다. 그 프로젝트에서 세션을
+열거나 — 그 루트에서 `/csync pull` 을 돌리면 — 따라온다. 글로벌 `CLAUDE.md` 와 메모리는
+다르다. 그쪽은 어느 세션에서든 동기화되므로, *그것들*이 뒤처져 있다면 `DIVERGED` 줄이
+있는지, 그리고 다른 머신이 실제로 push 했는지를 본다.
 
 **세션 시작 pull 이 더 이상 돌지 않는다.** `~/.claude/settings.json` 에서 hook 항목이
 사라진 것이다. 설치 스크립트를 다시 실행한다.

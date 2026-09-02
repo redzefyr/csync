@@ -188,7 +188,7 @@ fi
 # 7. Per-project memory: adopt local dirs into the repo, then link every dir
 #    the repo already has (covers dirs created on another machine).
 #
-# Claude keys project dirs by absolute path with '/' and '.' mangled to '-'
+# Claude keys project dirs by absolute path with '/', '.' and spaces mangled to '-'
 # (/Users/ann/dev/foo -> -Users-ann-dev-foo), which embeds the username.
 # Store repo dirs keyed relative to $HOME instead (dev-foo), so machines with
 # different usernames resolve to the same repo directory. Projects outside
