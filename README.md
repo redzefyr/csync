@@ -570,6 +570,21 @@ That is all of it. `init` runs the installer itself, and that run links the memo
 directory the repo already holds for each project — which is what a second machine
 needs, and the step people used to have to remember.
 
+⚠️ **Before step 2, put each project at the same path it has on the first
+machine** — the same path *relative to your home directory*; the two accounts may
+have different usernames. Per-project memory is keyed by that path, so
+`~/dev/acme-api` here and `~/work/acme-api` there are two unrelated projects as
+far as the repo is concerned. **Nothing reports this.** `init` succeeds, the
+workspace syncs normally, and only the memory quietly goes to a second directory
+the first machine never reads — which you notice weeks later, as a Claude that
+has forgotten things it was told. A project kept *outside* your home directory
+needs the identical absolute path on both machines instead. The reason is under
+[The memory directories](#the-memory-directories); this is the part of it you
+have to get right before you run step 2.
+
+Moving a project you already connected has the same effect, so if the path is
+wrong, fix it before you work rather than after.
+
 ## Going from local-only to a remote
 
 Create an empty **private** repository, then:
