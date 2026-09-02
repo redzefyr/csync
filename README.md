@@ -18,6 +18,7 @@ Install it, type `/csync`, and it walks you through the rest.
 
 ## Contents
 
+- [Quick start](#quick-start)
 - [Two ways to use it](#two-ways-to-use-it)
 - [Prerequisites](#prerequisites) — [Windows](#windows)
 - [Install](#install)
@@ -32,6 +33,205 @@ Install it, type `/csync`, and it walks you through the rest.
 - [Updating and removing](#updating-and-removing)
 - [When something looks wrong](#when-something-looks-wrong)
 - [How it is put together](#how-it-is-put-together)
+
+## Quick start
+
+### 1. Install
+
+Two places are involved and they are not the same place. **A shell** does the
+cloning and linking; **Claude Code** does everything after that. Nothing below
+mixes the two.
+
+#### In a shell — clone the skill
+
+```bash
+git clone https://github.com/redzefyr/csync.git ~/.claude/skills/csync
+```
+
+That path is what makes `/csync` a command: Claude Code discovers skills under
+`~/.claude/skills`. If you would rather keep the clone with your other
+repositories, clone it there and link it — the scripts resolve everything through
+their own pointers, so only the link matters:
+
+```bash
+git clone https://github.com/redzefyr/csync.git ~/dev/csync
+ln -s ~/dev/csync ~/.claude/skills/csync
+```
+
+Either way, `install.sh` maintains that link from then on.
+
+If you want a remote, **create an empty private repository now** — setup will ask
+for its URL. On a single machine you can skip that: choose **local only** and a
+bare repo on your own disk plays the part of the remote.
+
+#### In Claude Code — start a session and run setup
+
+```
+/csync
+```
+
+Nothing is wired up yet, so this runs `setup`. It asks two questions, then shows
+you every change before making it. Roughly:
+
+```
+you   /csync
+
+      csync is not installed on this machine. Two questions first.
+
+      Where should the sync repo live?          → ~/.csync
+      How should it sync?                       → new remote
+
+you   git@github.com:you/your-sync-repo.git
+
+      global/CLAUDE.md (your standing instructions to Claude) and
+      global/memory/** (per-project notes Claude has written) are pushed to
+      this remote verbatim. Checking that it is private before anything is
+      adopted...
+
+      gh repo view: private. Continuing.
+
+      install.sh --dry-run:
+        ADOPT:    ~/.claude/CLAUDE.md -> moved into the repo at ~/.csync/global/CLAUDE.md
+        link:     ~/.claude/csync-repo -> ~/.csync
+        link:     ~/.claude/csync-tool -> ~/.claude/skills/csync
+        hook:     SessionStart -> ~/.claude/skills/csync/scripts/csync-pull.sh
+
+      ADOPT means a real file of yours is moved into the git repo and a symlink
+      is left in its place. Apply this?
+
+you   yes
+```
+
+The dry run is not optional and not a formality — `setup` is the one command that
+touches files you did not ask it to touch. `ADOPT` moves one of your real files;
+`BACKUP` renames one to `.bak` because the repo already has that file. What each
+question means is in [Install](#install).
+
+#### Then connect each project
+
+Connecting a project is a Claude Code command, but it acts on **the project
+Claude currently has open** — so the working directory has to be that project
+first. Do it in whichever way you normally start Claude Code:
+
+```bash
+cd ~/dev/my-project
+claude
+```
+
+and then, in that session:
+
+```
+/csync init
+```
+
+`init` scaffolds `.csync/` in the project, puts it on its own `prj/<name>`
+branch, and re-runs the installer. **It ends by telling you to start a new
+session** — that is what makes the workspace take effect, so do that before
+expecting Claude to use it.
+
+Repeat for every project you want connected. You do not have to run the installer
+yourself between them — `init` runs it as part of its own procedure, and that run
+links every memory directory the sync repo holds, not just the project in front of
+it.
+
+### 2. TL;DR — the loop after that
+
+**Open a new session and type `/csync`.** With everything installed that means
+*pull → push → the table of open pipelines* — so the session starts by telling
+you what is waiting rather than by asking you to remember it.
+
+From there:
+
+| you want to | you type | what happens |
+|---|---|---|
+| work one pipeline properly | `/csync open <slug>` | the plan's status and next step are reported, findings other sessions handed it are folded in first, and the session is named after it |
+| do something small | *nothing* | not everything needs a pipeline. A one-line item in `GRAPH.md`'s backlog can just be done, and Claude records the outcome where it belongs |
+| turn that into real work | *approve the proposal* | when a backlog item turns out to need sequencing, a next step that has to outlive the session, or somewhere for other sessions to hand it findings, Claude says so and asks whether to promote it. On your yes it becomes a plan and the backlog line goes. It never promotes one by itself — a new plan is an entry every session reads |
+| finish a pipeline | *say it is done* | Claude verifies completion **in the code**, extracts the follow-ups nobody started, distributes the contents to `notes/` and `docs/`, then deletes the plan and leaves one line under closed pipelines |
+
+**There is deliberately no `/csync close`.** Closing is a judgment — the plan is
+the least reliable witness to whether its own work is finished — and a command
+would make it look like something you can just run. Say the pipeline is done and
+Claude walks the four steps.
+
+Two more you type yourself, and only yourself:
+
+- **`/csync update`** — updates the skill. Claude will tell you when the clone is
+  behind, and will not apply it mid-session: that would move the rules underneath
+  work already in progress.
+- **`/csync cleanup`** — prunes a workspace that has grown past being trustworthy.
+  It deletes documents and makes judgment calls, so it never runs unasked. Its
+  measure is reduction: a run that leaves the workspace bigger failed.
+
+Everything else is plumbing. A SessionStart hook fast-forwards on open, and
+Claude syncs on its own after writing notes or wrapping up, reporting it in one
+line.
+
+### 3. Best practice — teach your global `CLAUDE.md` about it
+
+csync works without this. What it adds is the part the skill cannot reach: rules
+that have to hold in sessions where **the skill was never loaded** — which is most
+of them, because `~/.claude/CLAUDE.md` is read at the start of every session while
+a skill is read only when something triggers it.
+
+Add a section like this to `~/.claude/CLAUDE.md` (the file csync now versions for
+you). Adjust `.csync/` if you renamed the workspace directory:
+
+```markdown
+## Claude's working documents
+
+- **Until you run `/csync` yourself in this session, the only thing Claude reads
+  under `.csync/` is `notes/`.** Traps that are easy to step on and decisions that
+  must not be reversed have to be known whatever the work is; everything else is
+  for after you have said you want that pipeline open. While the gate is closed:
+  - ⚠️ **Do not go outside `notes/`** — do not follow `[[slug]]` references out of
+    it, and do not open `GRAPH.md`, `plans/`, `docs/` or `.csync/CLAUDE.md` **by
+    any route**, grep, ls and search included. If a slug has to be resolved,
+    suggest `/csync open <slug>`.
+  - ⚠️ **Do not write to `.csync/` — `notes/` is read-only too.** The caps, the
+    admission criteria, the folding and placement rules are all in the documents
+    you are not reading right now; edit without them and you break it silently. If
+    something needs recording, do not write it — **suggest `/csync`.**
+  - ⚠️ **"Yourself" means me, the user** — the `sync` Claude runs on its own
+    initiative under the last rule below does not open the gate. If it did, it
+    would not be a gate.
+- Once the gate is open, the skill takes over: what to read first, and how many
+  pipelines one session may open.
+- Files Claude creates and maintains — working notes, design and planning
+  documents, investigation results — go under `.csync/`, not into the project
+  repo. **Session notes and scratch are the exception: those go in a scratchpad.**
+  Files that belong to the project repo by its own conventions — code, tests,
+  documentation the team shares — follow those conventions.
+- **The source of truth for how these documents are organised is the skill's
+  `references/workspace.md`, and no copy of it lives here.** ⚠️ The copy that used
+  to be here fell behind after the original was revised, and was genuinely wrong
+  by then — a cap with the wrong number, a directory that had been retired. Do not
+  paste one back in for convenience.
+- Claude decides when to sync: after writing memory or a `.csync/` note, when
+  wrapping up work. Report it as **one line** — "pulled and pushed" — and raise
+  anything that needs me, such as a diverged history or a push that failed after
+  its retry, immediately. **This applies to a session that only ran the script,
+  with the skill never loaded.**
+```
+
+#### What changes once it is in
+
+| | without it | with it |
+|---|---|---|
+| **a session that never triggers the skill** | writes a design document into your project repo, where it shows up in your next diff and never syncs | writes it under `.csync/`, or says the workspace is not open and offers `/csync` |
+| **the start of an ordinary session** | Claude either reads the whole workspace uninvited, or none of it | reads `notes/` — the traps and the decisions — and stops there until you open something |
+| **work done in a session with no skill loaded** | is committed but never pushed: the SessionStart hook only ever pulls, so it sits on one machine until some later session happens to sync | is pushed when the work wraps up, reported in one line |
+| **your global file over time** | gradually accumulates a summary of the workspace rules that drifts out of step with the real ones | keeps a pointer, and says out loud why it must stay a pointer |
+
+The third row is the one people discover late. The hook that runs when a session
+opens is a **pull**; nothing pushes on its own. Without a rule telling Claude to
+sync, a session that never loaded the skill leaves its work local — and you find
+out on the other machine, days later, when the note is not there.
+
+The first bullet — the read gate — is the one to keep even if you take nothing
+else. Its cost is one extra `/csync` when you actually want the pipeline; what it
+buys is that opening a session about an unrelated bug does not pull several
+hundred lines of somebody else's plans into the context.
 
 ## Two ways to use it
 
@@ -151,12 +351,24 @@ The installer's first pass is a dry run. It prints a plan in which
 `BACKUP` means one is about to be renamed to `.bak`. Nothing happens until you
 say yes.
 
-Once setup finishes, connect a project:
+Once setup finishes, connect a project. Two steps in two places — the working
+directory has to be the project before the command can act on it.
+
+In a shell:
+
+```bash
+cd ~/dev/my-project
+claude
+```
+
+Then in that Claude Code session:
 
 ```
-cd ~/dev/my-project
 /csync init
 ```
+
+`init` ends by telling you to start a new session. That is what makes the
+workspace take effect.
 
 ## What ends up where
 
@@ -268,11 +480,12 @@ at the same path *under* home.
 Projects outside your home directory keep the full mangled key, so those need
 identical absolute paths on both machines.
 
-Because each memory directory is its own symlink, **connecting a project on a
-second machine requires re-running the installer** — `install.sh` is what creates
-that individual link. `/csync init` reminds you and runs it; if you skip it,
-Claude writes memories into an unsynced local directory and they are lost when
-you switch machines.
+Because each memory directory is its own symlink, connecting a project on a second
+machine has to create that individual link, and `install.sh` is what creates it.
+**`/csync init` runs it for you**, as a step of its own procedure — that is why
+connecting a project is one command and not two. What matters is that the step is
+not skipped: without the link Claude writes memories into an unsynced local
+directory and they are lost when you switch machines.
 
 ## The workspace
 
@@ -352,10 +565,10 @@ Then in Claude Code, in this order:
 
 1. `/csync` → choose **existing repo** and give it the same remote URL
 2. `/csync init` in each project you want connected
-3. **run the installer once more** — `~/.claude/skills/csync/scripts/install.sh`
 
-Step 3 is the one people skip. It is what creates the individual memory symlink
-for each project you just connected.
+That is all of it. `init` runs the installer itself, and that run links the memory
+directory the repo already holds for each project — which is what a second machine
+needs, and the step people used to have to remember.
 
 ## Going from local-only to a remote
 

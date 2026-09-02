@@ -313,6 +313,55 @@ leaves this side pointing at a name that no longer exists, silently.
 session** — `grep -rn '<old-slug>'` over that workspace and the memory directory is
 the whole job.
 
+## The backlog — work with no plan yet
+
+`GRAPH.md`'s `## backlog` holds **one line per item**. It fills from two places: a
+finding whose other side does not exist yet, and the unstarted follow-ups
+extracted when a pipeline closes.
+
+**Not everything needs a plan.** A backlog item may simply be done — in a session
+that has another pipeline open, or in one that has none. Doing it is **not opening
+a pipeline**: a pipeline is opened by working a *plan* (`SKILL.md`), so a backlog
+item does not spend the one-per-project budget and does not rename the session.
+
+**Distribute it anyway when it is done.** There is no plan file to close, but the
+contents go to the same places as a closing plan's — the table under "Closing a
+pipeline" applies unchanged. ⚠️ **Then delete the backlog line in the same
+session.** An item finished but still listed is indistinguishable from one nobody
+has started, and the next session either does it a second time or stops trusting
+the index.
+
+**Promote it to a plan when it stops being one line.** The test is not size; it is
+whether something has to be **carried between sessions**:
+
+- more than one step, and their **order matters**
+- it will not finish in the session that starts it, so a **next step** has to
+  survive that session
+- another pipeline is likely to find something for it — a finding needs a
+  `## findings` block to land in, and only a plan has one
+- it is paired with work in another repository, which has to be recorded as a pair
+
+⚠️ **Meeting the bar is grounds for proposing, never for promoting.** Say which
+test it met and what the plan would cover, then **wait for an explicit yes.** A
+session that promotes on its own has decided what the project's next sessions are
+offered: a plan is an entry in `GRAPH.md`, which every session reads, and it
+becomes one of the pipelines the table shows. That is the same reason `list` is
+not a menu and `open` is the user's to ask for (`SKILL.md`) — taking work up, and
+creating work to be taken up, are decisions, never fallbacks.
+
+Once approved, promotion is a file from `templates/document/plan.md`, a `plans`
+entry in `GRAPH.md`, and **the backlog line removed in the same edit** — never
+keep the index in two places.
+
+⚠️ **The backlog is not a second `plans/`.** It is read at every session start, so
+its lines are charged against the gauge above, alongside `notes/`. An item that
+has sat there through several cleanups without being done or promoted is one
+nobody intends to do, and leaving it there funds the appearance of a tracked
+queue. ⚠️ **Say so and propose dropping it — name the item, then wait**, exactly
+as with promotion and for the same reason: **neither way out of the backlog while
+the work is still undone is a session's to take alone.** Deleting the line of an
+item you have just finished is not that — it records a fact.
+
 ## Each workspace must stand alone
 
 `prj/<name>` branches are orphan histories. A path into another project's

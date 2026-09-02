@@ -149,8 +149,8 @@ Re-run `$TOOL/scripts/install.sh` when a **new link** is needed, or one broke:
 
 | Trigger | Why |
 |---|---|
-| **After `init` on a machine that did not create the project** | Per-project memory is an individual symlink. Without it Claude writes memories into an unsynced local directory |
-| Another machine started using memory in a project this one already has | Same reason, opposite direction — the repo has the directory, this machine has no link to it |
+| **A project acquired memory after it was connected** | The memory loops link what already exists on one side or the other. A project connected before anything had been written about it has neither, so `init`'s own run finds nothing to link, and the directory Claude later creates stays local and unsynced until this runs |
+| Another machine started using memory in a project this one already has | Same loops, opposite direction — the repo has the directory, this machine has no link to it |
 | A new wrapper appeared in the sync repo's `bin/` | `~/.local/bin` links are per-file |
 | The workspace shows up as untracked in a project repo | `$WS/` fell out of the global excludes file |
 | The SessionStart pull stopped running | The hook entry in `~/.claude/settings.json` is gone |
@@ -160,9 +160,12 @@ Re-run `$TOOL/scripts/install.sh` when a **new link** is needed, or one broke:
 It is idempotent — run it when nothing is needed and it prints what already
 exists and changes nothing. When in doubt, run it.
 
-New machine, in this order: install the skill → `setup` → `init` each project →
-**`install.sh` again**. The second run is what picks up memory directories for
-the projects you just connected.
+New machine, in this order: install the skill → `setup` → `init` each project.
+**`init` runs `install.sh` itself** (step 7 of its procedure), and that run walks
+every memory directory the repo holds — not only the project being connected — so
+projects the repo already knows are linked by the time the last `init` finishes.
+What it cannot link is a project nothing has been written about yet; that is the
+first row of the table above.
 
 ## CLI wrappers in `bin/`
 
@@ -223,8 +226,8 @@ exactly the one whose plans nobody has looked at.
 
 A session has **opened a pipeline** in a project once it is working one of that
 project's plans. Reading `GRAPH.md` and `notes/` at session start is not opening
-one; neither is `cleanup`, `status`, a lookup, or writing a `## findings` block
-into someone else's plan.
+one; neither is `cleanup`, `status`, a lookup, working a backlog item, or writing a
+`## findings` block into someone else's plan.
 
 **Why it is conditional and not always.** A session that already has its pipeline
 open knows what it is doing, and the table is then noise — worse, noise that
@@ -429,8 +432,9 @@ wiring is removed.
 # References
 
 - `references/workspace.md` — how a workspace is organised: `GRAPH.md`, `plans/`,
-  `notes/` and who may revise a decision, `docs/`, the `## findings` hand-off,
-  keeping each workspace self-contained, closing a pipeline, cleanup.
+  `notes/` and who may revise a decision, `docs/`, the `## findings` hand-off, the
+  backlog and when an item there becomes a plan, keeping each workspace
+  self-contained, closing a pipeline, cleanup.
   **Read this before creating, renaming, filing or deleting any workspace
   document.**
 - `references/document-format.md` — what those documents **look like**: the YAML
