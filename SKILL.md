@@ -384,8 +384,9 @@ judgment task, not a script** — there is nothing to run. The procedure is in
 `references/workspace.md`, under "Closing a pipeline" and "Cleanup".
 
 **Its measure is reduction.** Count what every session reads — `GRAPH.md` plus
-`notes/` — before and after, report both, and call a run that ends larger a
-failed cleanup.
+`notes/` — before and after, and report the change as two columns: what pruning
+removed, and what format migration added. A run that ends larger **in the pruning
+column** is a failed cleanup. The unit is lines.
 
 ## /csync config [key] [value]
 

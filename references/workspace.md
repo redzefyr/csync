@@ -464,10 +464,32 @@ Pruning a workspace so a new session can trust it. There is nothing to run: read
 the files, decide, edit, delete, then `sync`.
 
 **Cleanup is a reduction, and it is measured.** Count the session-start reading
-before and after — `wc -l GRAPH.md notes/*.md` — and report both numbers. **Ending
-larger than it started is a failed cleanup**, whatever else was tidied, and it is
-reported as one: "what was deleted and what survived" is satisfied by a run that
-dropped three checklists and added four traps, and two numbers are not.
+before and after — `wc -l GRAPH.md notes/*.md`. "What was deleted and what
+survived" does not satisfy this: it is equally true of a run that dropped three
+checklists and added four traps, and two numbers are not.
+
+**Report the change as two columns**, because a cleanup does two jobs and only one
+of them is pruning:
+
+```
+pruned      -180
+migrated     +26     frontmatter keys, template headers
+```
+
+**Ending larger than it started is a failed cleanup, judged on the pruning column
+alone.** Migration is the other job — cleanup is the only thing that migrates
+document formats — and what it adds is required by the format, bounded, and
+attributable line by line, so it neither excuses a run that pruned nothing nor
+condemns one that pruned well. ⚠️ **The migration column is what the format
+requires, not what this session felt like adding.** Anything you cannot point at a
+template or a frontmatter key for goes in the pruning column, where it counts
+against the run.
+
+⚠️ **The unit is lines, and it stays lines.** Context is what the budget is really
+about, but nothing here can count tokens and the number would move under you when
+the model changes, leaving two sessions' figures incomparable. Bytes track the
+real cost better — that correction belongs to the gauge, which is compared against
+a fixed budget, and not to this report, which a person reads and judges.
 
 ⚠️ **A defect found during cleanup is not itself something to write down.** Fix it
 and move on. It earns a `notes/` entry only when **the condition that produced it is

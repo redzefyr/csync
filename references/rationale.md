@@ -150,6 +150,33 @@ that are always read together is not a limit, and the measured sums were 734 and
 costs — stated that way so the next session that moves the number knows what it
 is moving.
 
+### A gauge is re-derived, never converted
+
+**2026-09-07.** The measurement above invites an obvious move: the units disagree
+about how a corpus differs, so take the ratio and scale the gauge by it. It does
+not survive contact.
+
+**The anchor decides the answer, and it decides the direction.** Equalising bytes
+per line and equalising characters per line pull the number *opposite ways* from
+that one measurement, and tokens — the thing the budget is actually about — give a
+third. A conversion is not a calculation, then; it is a choice of anchor wearing
+one, and the choice is usually made without being noticed.
+
+**The factor is also not resolvable at that size.** This repo's own reference
+files — one language, one author, one genre — run from 40 to 55 characters per
+line. That spread is wider than the gap the ratio would be correcting for, so a
+figure taken across corpora is measuring genre and house style at least as much as
+anything else.
+
+What replaces it is the derivation the gauge already half uses: the fixed header a
+template imposes, plus what a file's entries cost times how many it carries, plus
+the same for the index. Every term is measured in the corpus it will govern, so no
+constant has to cross between them.
+
+⚠️ **Whoever moves the number writes down what they anchored on**, in the same
+breath as the number. "Why that value" is not enough when one measurement supports
+values in both directions.
+
 ### `notes/` entry is two tests, and the second one is reach
 
 **2026-09-07.** Routing single-site traps and judgments into code comments was
@@ -280,6 +307,34 @@ looking for things to write. The same four exceptions, stated as exceptions to
 deletion, produce the opposite posture. Seven of cleanup's eight steps produce or
 move text; the one step that decides what goes has to make deletion the default in
 its own wording.
+
+### The cleanup measure is two columns, and the unit stays lines
+
+**2026-09-07.** Cleanup had one number serving two jobs. Its measure is reduction
+and "ending larger is a failed cleanup" — but cleanup is also the only thing that
+migrates document formats, and a migration *adds*: a required frontmatter key, a
+template header, a guard paragraph. A run that correctly brought a workspace up to
+the current format would report itself as a failure, which teaches the next session
+either to skip the migration or to prune something real to pay for it.
+
+Splitting the report beats loosening the verdict, because the migration column is
+checkable: every line in it can be pointed at a template or a frontmatter key.
+Nothing else may enter it, or it becomes the column a session files whatever it
+wanted to add.
+
+The unit was reconsidered at the same time and kept. Context is what the budget is
+really about, so tokens are the honest unit — but there is no tokenizer in a shell
+script, an API count needs network and credentials, and the number moves when the
+model changes, so two sessions' figures would not be comparable. Bytes are the
+better proxy and cost nothing: measured on this repo's own two READMEs, the same
+document in translation is 9% shorter in lines, 36% shorter in characters and 16%
+*larger* in bytes — so the three units do not even agree on **which way** a corpus
+differs. ⚠️ That is a reason to say which unit a figure is in, **not a factor to
+convert a gauge by**; see the next entry. The cleanup report is read by a person
+deciding whether the run was any good, and "48,213 → 33,904" is not a sentence
+anyone judges. A byte figure also has the shape the 300-line incident
+warned about — the more precise a number looks, the more it is read as a ceiling
+to optimise against.
 
 ### Cleanup migrates document formats, and nothing else does
 
