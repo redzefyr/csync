@@ -150,6 +150,30 @@ that are always read together is not a limit, and the measured sums were 734 and
 costs — stated that way so the next session that moves the number knows what it
 is moving.
 
+### `notes/` entry is two tests, and the second one is reach
+
+**2026-09-07.** Routing single-site traps and judgments into code comments was
+added on 2026-09-01, and every place it was hung was an **exit**: the "over the
+budget, fold" list, the closing table, cleanup step 7, and a `###` section placed
+after the overflow paragraph. Entry stayed one question — "would starting work
+without knowing this make you wrong?" — which a single-site trap answers yes to on
+its merits. The rule was correct and unreachable: a workspace under the gauge never
+ran it, so the entry it should have stopped was already in the file and already
+being read by every session, waiting for a cleanup that had no reason to come.
+
+The fix is not another instruction. Those sessions had read "keep it small" and
+written the entry anyway; what they had was a test that passed it. Necessity had to
+stop being sufficient, so entry became two tests — necessity, then **reach**: where
+is the reader standing when it fires? `notes/` is read before anyone knows which
+files the session touches, which is what makes it the wrong home for something that
+fires only once one file is open. The exit paths stayed where they were: they are
+still how an entry written before this rule gets out.
+
+The same guard went into `notes/traps.md`'s own header, and it costs the gauge —
+header lines count too. It buys the one thing no reference file can: the text is in
+context at the moment the entry is written, in a session that never loaded this
+skill.
+
 ### `docs/` splits live from archive by directory, not by label
 
 When two opposite lifetimes share a directory, a snapshot gets read as the

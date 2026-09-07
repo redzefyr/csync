@@ -53,7 +53,7 @@ text no session needs anywhere. When both readings fit, fold.
 
 `GRAPH.md` **and** `notes/` are both read at every session start, so the limit is
 on **their sum** — a capped file beside an uncapped one is an uncapped read.
-`notes/` is held under it by its entry test, `GRAPH.md` by a structural cap.
+`notes/` is held under it by its entry tests, `GRAPH.md` by a structural cap.
 
 **Gauge: 500 lines, `GRAPH.md` + `notes/` together.** Derived, not decreed:
 `notes/`'s own gauge was 400, and a `GRAPH.md` at its cap holding a handful of
@@ -168,6 +168,33 @@ Only two things survive:
    route that reached it, and **mark who may revise it**
 2. **Traps that are easy to step on** — prefer the ones that fail silently
 
+**Two tests decide entry, and an entry needs both.**
+
+1. **Necessity** — "would starting work without knowing this make you wrong?"
+   No → it does not go here. **"Good to know" fails**, and that category is most
+   of the bulk
+2. **Reach** — **"where is the reader standing when it fires?"** Inside one
+   routine, one type, one interface → **a comment at that code site, not here**
+
+**The second test is what the first one lets through.** `notes/` is read at
+session start, *before* anyone knows which files this session touches — so a
+thing that fires only once one file is already open passes test 1 on its merits
+and still has no business here. ⚠️ **This is an entry rule, not a fold.** It does
+not wait for the budget: an entry that fails test 2 was never `notes/` material,
+and the session that writes it anyway has already charged every later session for
+it. "Where the reader stands decides the home" below is the whole rule, including
+the two kinds of entry that are exempt.
+
+Over the budget, fold during that session. What overflows usually has a home
+already: the list of plans → `GRAPH.md`, conventions and procedures → the project
+repo's `PROTOCOL.md`/`README.md`, machines and environments → memory, build steps
+→ the workspace `CLAUDE.md`, measured numbers → `docs/archive/`.
+
+⚠️ **Folding means moving, not discarding.** Deleting a trap or its reasoning to
+hit a number turns this rule into a loss machine.
+
+Session notes, scratch and logs do not belong in `notes/`. Use a scratchpad.
+
 ### A decision carries its authority
 
 A decision reached by working and a decision the user handed down read identically
@@ -195,22 +222,7 @@ came out of doing the work — including everything the closing table below rout
 into `notes/` — is a `judgment`. It becomes a `mandate` only when the user affirms
 it, and that is the one edit to a marker that needs no discussion.
 
-**One test decides entry — "would starting work without knowing this make you
-wrong?"** Yes → `notes`. No → somewhere else. **"Good to know" fails**, and that
-category is most of the bulk.
-
-Over the budget, fold during that session. What overflows usually has a home
-already: the list of plans → `GRAPH.md`, conventions and procedures → the project
-repo's `PROTOCOL.md`/`README.md`, machines and environments → memory, build steps
-→ the workspace `CLAUDE.md`, measured numbers → `docs/archive/`, **an entry one
-routine, type or interface is the whole scope of → a comment at that code site.**
-
-⚠️ **Folding means moving, not discarding.** Deleting a trap or its reasoning to
-hit a number turns this rule into a loss machine.
-
-Session notes, scratch and logs do not belong in `notes/`. Use a scratchpad.
-
-### When one code site is the whole scope, the code is the home
+### Where the reader stands decides the home
 
 **Ask where the reader is standing when they step on it.** A trap you can only
 meet by editing one routine, one type, one interface — or by calling it wrong
@@ -255,6 +267,7 @@ as a side effect of tidying the workspace, so say which files got comments and
 leave committing them to that repo's own rules — a `notes/` count that fell
 because unreported changes landed in the user's code is not the reduction they
 asked for.
+
 
 ## `docs/` — **location is lifetime**
 
@@ -528,8 +541,8 @@ of then", not corrected.
 **7. Notes — hold the principle** (in context every session). Only **decisions
 that must not be reversed** and **traps that are easy to step on** survive; over
 the budget, move things to their real homes — **including into the code itself**,
-for an entry one routine, type or interface is the whole scope of ("When one code
-site is the whole scope"). Session notes recording only what happened get
+for an entry one routine, type or interface is the whole scope of ("Where the
+reader stands decides the home"). Session notes recording only what happened get
 discarded; anything recording a trap does not.
 
 **8. Check `GRAPH.md` against the actual tree** — the number of live pipelines,

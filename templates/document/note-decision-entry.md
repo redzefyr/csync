@@ -29,9 +29,11 @@
   that file's frontmatter (default "Why."). Write it in the file's language and
   keep the marker matching.
 
-  Write the GROUND -- what makes the decision right -- not how it was found. One
-  test decides entry: "would starting work without knowing this make you wrong?"
-  "Good to know" fails, and that category is most of the bulk.
+  Write the GROUND -- what makes the decision right -- not how it was found. Two
+  tests decide entry, and it needs both: "would starting work without knowing this
+  make you wrong?" ("good to know" fails, and that is most of the bulk), and
+  "where is the reader standing when it fires?" -- inside one routine, type or
+  interface, the home is a comment there.
 
   A `judgment` settled inside ONE routine, type or interface, that nothing
   outside it can be wrong about, belongs in a comment at that code site instead
