@@ -56,7 +56,8 @@ invented key is taken for a real one, and nothing reports the difference.
 - `docs/archive/` — the judgment of a given day, left as written. Not the pile
   you can skip: the grounds an option was rejected on live here
 
-Nothing sits directly in `docs/`. Procedures, structural surveys and analysis
+Nothing sits directly in `docs/` but `closed-pipelines.md`, the closed-pipeline
+log. Procedures, structural surveys and analysis
 guides belong to the code, so they go in the project repo, not here.
 
 Commit and push with `/csync sync` when wrapping up.

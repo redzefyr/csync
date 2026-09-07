@@ -30,7 +30,7 @@ already have made stale. The marker goes when the last entry does.
 
 **`docs/design/` is live** — design only, revised when the code changes.
 **`docs/archive/` is the judgment of a given day**, left as written.
-Nothing sits directly in `docs/`.
+Nothing sits directly in `docs/` but `closed-pipelines.md`.
 
 ### design
 ### archive
@@ -45,3 +45,6 @@ Nothing sits directly in `docs/`.
 ## backlog — not big enough to open a pipeline
 
 ## closed pipelines
+
+`docs/closed-pipelines.md` — one line per pipeline, appended as each one
+closes. **Closed slugs resolve there**, not here.

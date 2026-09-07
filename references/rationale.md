@@ -201,6 +201,44 @@ header lines count too. It buys the one thing no reference file can: the text is
 context at the moment the entry is written, in a session that never loaded this
 skill.
 
+### `closed` moved out of `GRAPH.md`
+
+**2026-09-07.** The gauge covers `GRAPH.md` and `notes/` together, and its
+`GRAPH.md` term was derived from the pipeline cap — five to eight lines, a handful
+of pipelines. But that file also carries `docs`, `backlog` and `closed`, and none
+of the three has a cap. Measured across workspaces, the capped section was the one
+being honoured while the uncapped ones were most of the file; one workspace had no
+live pipeline left and still spent a full `GRAPH.md` on the rest.
+
+That is the shape the gauge revision fixed one level up: a limit on one of several
+things always read together is not a limit. `closed` is the worst of the three
+because it is the only one **append-only by construction** — every pipeline a
+project finishes adds a line, nothing ever removes one, and the file is read at
+every session start. A project pays for its whole history, forever, to start a
+session.
+
+Moving it out runs the same test the code-site route runs: where is the reader
+standing? Someone reading a closed line is resolving a slug whose file is gone, or
+asking whether a thing was tried before. Neither of those happens at session start.
+
+It sits at `docs/closed-pipelines.md` and not under `design/` or `archive/`
+because it belongs to neither — one is revised when the code changes, the other is
+the judgment of a day, and this is an index that is only appended to. The root of
+`docs/` was closed to documents to stop an unclassified pile forming there, and a
+fixed filename cannot become a pile, so the exception is written as that name: a
+second document at the root is still the old shape.
+
+⚠️ **The cost is a hop on slug resolution**, which is why the pointer line says
+where closed slugs resolve rather than merely naming a file.
+
+⚠️ **`closed` is not the only section that ratchets**, and saying so would be
+wrong. The `docs` listing carries `archive/` entries, and an archive document is
+never deleted by rule, so that half of it accumulates the same way. It stays in
+place for now on one difference: its lines point at documents a session still
+opens, where every line in `closed` points at a plan that no longer exists.
+`backlog` is bounded by the work being live and does not ratchet at all. If the
+archive listing outgrows its section, the treatment here is the one to reach for.
+
 ### `docs/` splits live from archive by directory, not by label
 
 When two opposite lifetimes share a directory, a snapshot gets read as the

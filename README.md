@@ -147,7 +147,7 @@ From there:
 | work one pipeline properly | `/csync open <slug>` | the plan's status and next step are reported, findings other sessions handed it are folded in first, and the session is named after it |
 | do something small | *nothing* | not everything needs a pipeline. A one-line item in `GRAPH.md`'s backlog can just be done, and Claude records the outcome where it belongs |
 | turn that into real work | *approve the proposal* | when a backlog item turns out to need sequencing, a next step that has to outlive the session, or somewhere for other sessions to hand it findings, Claude says so and asks whether to promote it. On your yes it becomes a plan and the backlog line goes. It never promotes one by itself — a new plan is an entry every session reads |
-| finish a pipeline | *say it is done* | Claude verifies completion **in the code**, extracts the follow-ups nobody started, distributes the contents to `notes/` and `docs/`, then deletes the plan and leaves one line under closed pipelines |
+| finish a pipeline | *say it is done* | Claude verifies completion **in the code**, extracts the follow-ups nobody started, distributes the contents to `notes/` and `docs/`, then deletes the plan and leaves one line in the closed-pipelines log |
 
 **There is deliberately no `/csync close`.** Closing is a judgment — the plan is
 the least reliable witness to whether its own work is finished — and a command

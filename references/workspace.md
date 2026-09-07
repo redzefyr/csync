@@ -271,8 +271,16 @@ asked for.
 
 ## `docs/` — **location is lifetime**
 
-**`docs/` itself holds no documents**; everything sits in `design/` or `archive/`,
-and which one it is decides whether it is ever revised again.
+**`docs/` itself holds one document and no others** — `closed-pipelines.md`, the
+log `GRAPH.md`'s `closed` section points at. Everything else sits in `design/` or
+`archive/`, and which one it is decides whether it is ever revised again.
+
+⚠️ **The exception is that one filename, not a tier.** This rule exists to stop an
+unclassified pile forming at the root, and a fixed name cannot become one — a
+second document there is the old shape returning. It sits outside both
+directories because it belongs to neither: `design/` is revised when the code
+changes, `archive/` is the judgment of a day, and this is an index that is only
+ever appended to.
 
 **`design/` is design, not documentation in general.** The test is *"does this
 state how something is built, or the criterion something was built against?"* —
@@ -308,6 +316,15 @@ is what the file is *for*:
 **One pipeline, five to eight lines** — the slug line, status, next step, any
 markers. This is where you decide *which* pipeline to open, and that decision does
 not need the pipeline's contents; what will not fit is plan body.
+
+**`closed` is a pointer, not a list.** The log lives in
+`docs/closed-pipelines.md` and this file carries one line naming it.
+⚠️ **It is append-only and nothing ages it out**, so kept inline it charges every
+session for every pipeline the project ever finished — and it keeps charging after
+the last live pipeline is gone. The reader of one of those lines is not at session
+start either: they are resolving a slug whose file no longer exists, or asking
+whether something was tried before. That is a lookup, and a lookup's home is a
+document you open.
 
 **A plan entry states the present, and only the present.** A rename, a corrected
 status, where a section went when it closed — all of that lives inside the plan.
@@ -454,9 +471,11 @@ Then distribute the contents:
 | unstarted follow-ups | a new plan, or the backlog (step 2) |
 | checklists, status tables, step-by-step records | discard |
 
-Finally **delete the plan file and leave one line under "closed pipelines" in
-`GRAPH.md`.** The workspace is a git clone, so the full text stays in the
-`prj/<name>` history.
+Finally **delete the plan file and append one line to
+`docs/closed-pipelines.md`** — copy
+`~/.claude/skills/csync/templates/document/closed-pipelines.md` on the first
+close. `GRAPH.md`'s `closed` section names that file and carries nothing else. The
+workspace is a git clone, so the full text stays in the `prj/<name>` history.
 
 ## Cleanup
 
@@ -505,11 +524,12 @@ repos** in `SKILL.md`).
 **0. If the structure is the old shape, reorganise first**, or what you tidy just
 piles up in the old place again. The old shapes: no `GRAPH.md` · `plans/` filenames
 that are not `<planned>-<advanced>-<slug>` · hand-off notes and session logs in
-`notes/` · **documents directly under `docs/`** · **a `docs/research/` directory**.
+`notes/` · **any document but `closed-pipelines.md` directly under `docs/`** ·
+**a `docs/research/` directory**.
 
-`docs/research/` → `docs/archive/`, wholesale. Documents at the root of `docs/` go
-one of three ways: **design** → `docs/design/` · **the judgment of a day** →
-`docs/archive/` · **procedures, surveys and guides that belong to the code** → the
+`docs/research/` → `docs/archive/`, wholesale. Documents at the root of `docs/`
+other than `closed-pipelines.md` go one of three ways: **design** →
+`docs/design/` · **the judgment of a day** → `docs/archive/` · **procedures, surveys and guides that belong to the code** → the
 project repo, the workspace copy deleted once the move is verified.
 
 **Migrating documents to the frontmatter format belongs here and nowhere else.** A

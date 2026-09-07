@@ -228,13 +228,16 @@ what the file is. What is exact is the **skeleton**:
 - one line
 
 ## closed pipelines
-- ~~[[slug]]~~ closed YYYYMMDD `<commit>` — one-line conclusion
+`docs/closed-pipelines.md` — closed slugs resolve there
 ```
 
 - **section headings are h2 and begin with a key from a closed set** —
   `plans` · `docs` · `notes` · `backlog` · `closed`. Anything after the key,
   usually ` — ` and a sentence, is free
 - **plan entries are h3 and open with `[[slug]]`**
+- **`closed` carries no entries** — it names `docs/closed-pipelines.md`
+  and stops. That file holds the lines, one per pipeline; copy
+  `templates/document/closed-pipelines.md` on the first close
 
 📌 **A path written next to a slug is for the reader. A tool must not read it.**
 Slugs resolve from filenames (`plans/<planned>-<advanced>-<slug>.md`, basename
