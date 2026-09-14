@@ -1,45 +1,38 @@
-## {{ONE-LINE TITLE — the standing choice}} ({{YYYY-MM-DD}} · {{AUTHORITY}})
+## {{ONE-LINE TITLE — the rule the user set}} ({{YYYY-MM-DD}} · {{AUTHORITY}})
 
-{{What was decided, in one or two sentences.}}
+{{The rule, in one or two sentences, in the words the user confirmed.}}
 
-**Why.** {{The reason. Without this the next session reverses it.}}
+**Why.** {{The reason the user gave. Without this the next session reverses it.}}
 
 <!-- Delete this comment once filled in.
   Paste as a new `##` entry at the end of notes/decisions.md. Flat list, no
   nesting -- an entry that needs subsections is a docs/ document with a one-line
   note pointing at it.
 
-  AUTHORITY is one of the three declared as `authority_markers` in that file's
-  frontmatter, in that file's language. It decides who may revise this entry:
+  This file holds THE USER'S rules only. Write an entry when the user has stated
+  a rule meant to outlast the task at hand, and only after reading the wording
+  and the reason back to them. If they gave no reason, ask -- a reason Claude
+  supplies here is recorded as theirs. A conclusion Claude reached by working is
+  a `judgment`, and it goes in notes/knowledge.md instead.
+
+  AUTHORITY is one of the two declared as `authority_markers` in that file's
+  frontmatter, in that file's language:
 
     mandate  -- the user decided it, EXPLICITLY. Raise it and let them decide;
-                never revise it yourself. Inferred intent is not a mandate --
-                "they would want this" is a judgment
-    judgment -- Claude concluded it. Revise it without asking once its ground
-                stops holding, and say so in the session report
+                never revise it yourself. Inferred intent is not a mandate
     held     -- not settled yet, and how an unmarked entry reads. Treat as a
                 mandate, and settle it with the user the first time it is
                 actually in the way
 
-  Whoever wrote the decision does not choose freely between the first two: a
-  decision reached by working, at the close of a pipeline, is a `judgment`. It
-  becomes a `mandate` only when the user affirms it.
+  The reason paragraph opens with the bold run declared as `why_marker` in that
+  file's frontmatter (default "Why."). Write the GROUND -- what makes the rule
+  right -- not how it came up.
 
-  The reason paragraph must open with the bold run declared as `why_marker` in
-  that file's frontmatter (default "Why."). Write it in the file's language and
-  keep the marker matching.
+  A mandate stays here even when one routine is its whole scope: a comment is
+  revised by anyone who touches that code. The comment may restate it in one
+  line.
 
-  Write the GROUND -- what makes the decision right -- not how it was found. Two
-  tests decide entry, and it needs both: "would starting work without knowing this
-  make you wrong?" ("good to know" fails, and that is most of the bulk), and
-  "where is the reader standing when it fires?" -- inside one routine, type or
-  interface, the home is a comment there.
-
-  A `judgment` settled inside ONE routine, type or interface, that nothing
-  outside it can be wrong about, belongs in a comment at that code site instead
-  of here. `mandate` and `held` stay in this file -- a comment is revised by
-  anyone who touches that code, including someone with no access to the
-  workspace.
+  After pasting, run ~/.claude/skills/csync/scripts/csync-ledger.sh gauges.
 
   Rules: references/workspace.md ("notes/")
 -->

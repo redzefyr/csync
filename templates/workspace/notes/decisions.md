@@ -1,47 +1,41 @@
 ---
-csync: note/1
+csync: note/2
 kind: decisions
+gauge: /200
 why_marker: |
   Why.
 authority_markers:
   mandate: |
     mandate
-  judgment: |
-    judgment
   held: |
     held
 ---
 
-# Decisions — the standing choices, and who may change them
+# Decisions — the standing rules the user set
 
-**Record why it was decided, not just what was decided.** Without the reason the
-next session reverses it. Write the **ground** — what makes the decision right —
-not how it came to be found. Traps go in [[traps]]; live work and where to start
-is `../GRAPH.md`.
+**Only the user's rules go here.** An entry is written when the user states a
+rule meant to hold beyond the task at hand — calling it a rule, a convention, a
+design, a spec are the usual signs, but the words are examples and not the test —
+and **after the wording and the why have been read back and confirmed.** If the
+user gave no reason, ask; do not supply one. What Claude concluded by working
+goes in [[knowledge]].
 
-**Every entry carries an authority marker, and it decides who may revise that
-entry.** The three are declared as `authority_markers` above — write them in this
-file's language and keep them matching.
+**Every entry carries an authority marker**, declared as `authority_markers`
+above in this file's language:
 
 - **`mandate`** — the user decided it, explicitly. Work within it. When the work
   argues against it, **raise it and let the user decide**; never revise it
   yourself and never quietly route around it. ⚠️ **Inferred intent is not a
-  mandate** — "they would want this" is a `judgment`, and marking it `mandate`
-  inflates the protected tier until the whole file is frozen
-- **`judgment`** — Claude concluded it. Consult it the same way, and **revise it
-  without asking once the ground it stands on stops holding** — that is what the
-  ground is written down for. Say in the session report that you did, and what
-  changed
+  mandate** — "they would want this" is a `judgment`, and it goes in [[knowledge]]
 - **`held`** — authority not settled yet, which is also how an **unmarked** entry
-  reads. Treat it as a `mandate` for now, and settle it **the first time it
-  actually gets in the way**: say it is `held`, say which way you read it, and
-  agree the marker with the user. Not a migration to run through the file — an
-  entry nobody has bumped into costs nothing sitting there
+  reads. Treat it as a `mandate`, and settle it with the user **the first time it
+  actually gets in the way** — not as a pass through the file. Settled as
+  Claude's, it moves to [[knowledge]] as a `judgment`
 
-Markers are settled, not fixed: a `judgment` the user affirms becomes a
-`mandate`, and a `held` becomes whichever it turns out to be.
+⚠️ **`gauge` is `<max>/<alarm>`, and this file has no max** — nothing in it is
+Claude's to fold. After writing here, run
+`~/.claude/skills/csync/scripts/csync-ledger.sh gauges`; past the alarm and not yet
+reported this session, tell the user and leave the choice to them.
 
-One flat list of `##` entries. Every entry carries a paragraph opening with the
-bold run declared as `why_marker` above. Copy
-`~/.claude/skills/csync/templates/document/note-decision-entry.md` — read it
-there rather than rebuilding the heading from memory.
+One flat list of `##` entries. Copy
+`~/.claude/skills/csync/templates/document/note-decision-entry.md`.

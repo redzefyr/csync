@@ -100,6 +100,8 @@ stated conditions are the test.
 
 ### `notes/` is capped, and the cap is a gauge
 
+🔓 **Superseded 2026-09-14** — the gauge is now per file ("Gauges are per file, and there is no sum"). What survives: a number is not the user's ceiling, and folding means moving.
+
 **2026-08-27, twice.** The original gauge was 300 lines. It was a Claude's
 translation of the principle ("loaded every session, so keep it small") into a
 number, written down without its reasoning — and a later session read the bare
@@ -109,6 +111,8 @@ folding means *moving*, not discarding. The gauge went to 400 at the same time,
 because running over costs less than losing something while trimming.
 
 ### A decision carries who may revise it
+
+🔓 **Superseded 2026-09-14** — authority is now also the file an entry sits in ("`decisions.md` and `knowledge.md` split by whose entries they hold"). The carve-out — who *decided* is not route — stands.
 
 **2026-09-01.** `notes/decisions.md` was titled "what must not be reversed" and had
 one authority level, while its write paths mixed two sources: the user's explicit
@@ -142,6 +146,8 @@ mandate.** Without it, "the user would want this" marks itself `mandate`, the
 protected tier swallows the file, and the distinction is back to one level.
 
 ### The gauge covers `GRAPH.md` and `notes/` together
+
+🔓 **Superseded 2026-09-14** — there is no sum, and `GRAPH.md` is gone ("Gauges are per file, and there is no sum").
 
 **2026-08-30.** `notes/` was capped at 400 lines; `GRAPH.md`, read in the same
 breath at every session start, was capped at nothing. A limit on one of two files
@@ -202,6 +208,8 @@ context at the moment the entry is written, in a session that never loaded this
 skill.
 
 ### `closed` moved out of `GRAPH.md`
+
+🔓 **Superseded 2026-09-14** — `GRAPH.md` itself is retired ("`GRAPH.md` is replaced by a derived ledger"). The log's location and the reason for it stand.
 
 **2026-09-07.** The gauge covers `GRAPH.md` and `notes/` together, and its
 `GRAPH.md` term was derived from the pipeline cap — five to eight lines, a handful
@@ -285,11 +293,15 @@ is not read every session is the one that goes stale.
 
 ### `GRAPH.md`'s entries are free prose
 
+🔓 **Superseded 2026-09-14** — no index file remains. The principle — a line a tool cannot classify is displayed, never dropped — carries into the ledger's "out of shape" list.
+
 Real entries carry emoji-led lines that no schema anticipated. A line a tool
 cannot classify must be displayed, never dropped: dropping raises no error, and
 the reader concludes it was never written.
 
 ### `GRAPH.md` gets a structural cap, not a line count
+
+🔓 **Superseded 2026-09-14** — no index file remains ("`GRAPH.md` is replaced by a derived ledger").
 
 **2026-08-30.** The two indexes measured carried 28 struck-through entries and 155
 date mentions between them — renames, corrected statuses, the whereabouts of
@@ -394,6 +406,121 @@ and deleting plans on close *mean*. History therefore holds superseded judgments
 stated with their original confidence, and nothing in the text marks them as
 retired. Pulled back without that context, a rule the user already changed comes
 back to life.
+
+### Gauges are per file, and there is no sum
+
+**2026-09-14, decided by the user.** `notes/decisions.md` grows for as long as a
+project lives, and nothing can shrink it: its entries are the user's, so no fold is
+Claude's to make. Under one budget shared with the rest of `notes/`, that growth was
+charged to the file Claude *can* fold, and what got squeezed out was traps and
+Claude's own choices — the entries the budget existed to keep sharp. What a file
+may do when it runs over depends on whose entries it holds, so the limit has to sit
+on each file. The sum's own ground — two files always read together — had also
+weakened, with the index file leaving the session-start read.
+
+Hence `gauge: <max>/<alarm>` in each file's own frontmatter: in context whenever
+the file is, movable per project, with no copy to drift. `decisions.md` gets an
+alarm and no max, because the only response to it is the user's. The defaults
+(`/200`, `300/`, `50/`) were set by the user when this was decided, not derived
+from a measurement — ⚠️ whoever moves a default writes down what they anchored on.
+
+The alarm is said once per file per session: at `open`, or the first time a check
+after a write shows the file past. An alarm at every session start is one the user
+learns to raise instead of act on. "The write that crosses it" was the first
+wording, and no session could obey it — the check runs after the write and cannot
+tell a file that just crossed from one already over, and nothing carries the
+before-count. "First seen this session" needs no state beyond the session itself.
+At `open` the fold is proposed, not done: a session that opened a plan to work it
+would otherwise spend itself on a cleanup nobody asked for.
+
+### `decisions.md` and `knowledge.md` split by whose entries they hold
+
+**2026-09-14.** Mandates and Claude's judgments shared one file, told apart by a
+token. Every policy that file needed — who may revise, whether it may be folded,
+what happens past a gauge — had to be stated twice inside it, and the file's growth
+policy could only fit one of the two. Moving the authority into the file makes each
+policy one sentence. `held` stays on the user's side, because settling it is
+exactly the guess the marker exists to prevent.
+
+**One `knowledge.md`, not a judgments file and a traps file.** Both are Claude's,
+both are read at session start, both pass the same reach test and are revised on
+the same terms. Two files would mean two maxes, and a full one would force folding
+while the other had room — the shared-budget problem again, one level down. The one
+thing a split would have bought, a checkable entry kind, the heading token already
+gives, the same way `decisions` carries authority.
+
+### `GRAPH.md` is replaced by a derived ledger
+
+**2026-09-14.** A hand-kept index had to be updated at every create, rename, close
+and findings fold, and every miss read exactly like a current line — a findings
+marker left after its block was folded, a status one edit behind its plan. It was
+also read at every session start, to answer a question most sessions never ask.
+Every field it carried already existed in frontmatter and filenames, which the
+format made machine-readable precisely so nothing would have to be restated.
+
+`csync-ledger.sh` derives the listing each time and writes nothing. A generated
+file was rejected: committed from two machines, it is a divergence on a
+fast-forward-only branch, and a stale copy is the original problem back.
+
+What was given up is an explicit "leading pipeline" order — now status, then most
+recently advanced — and free prose under an index entry, which belongs in the plan.
+⚠️ **The migration has an order**: a machine still on an older skill reads a
+missing `GRAPH.md` as the old shape and recreates it, so every machine updates
+first.
+
+### The backlog is a root file, outside `notes/`
+
+**2026-09-14.** `notes/` holds what any session must know whatever it is doing, and
+a queue of unstarted work is not that — it is what a session with no pipeline open
+picks from. Filed in `notes/` it would also cross the read gate that keeps work
+queues out of sessions that never asked for them. Each item carries the date it was
+listed, so "untouched through several cleanups" can be read off the file.
+
+### The workspace `CLAUDE.md` is loaded with the first note
+
+**2026-09-14.** `setup.md` and the README said nothing loads `$WS/CLAUDE.md`, and
+the template was written on that assumption — a full copy of the workspace rules,
+read only by whoever went looking. Observed instead: Claude Code loads a
+subdirectory's `CLAUDE.md` when a file under it is read with the Read tool, for a
+dot-directory, a git-ignored one and a nested clone alike. So every rule copied
+there was paid for by every session that read a note, including gate-closed ones
+told not to open it, and none of it was ever updated after `init`. The template
+now holds the description and project facts only.
+
+### Closing and cleanup moved to their own reference
+
+**2026-09-14.** `workspace.md` is read before any workspace document is written,
+and a quarter of it was the closing and cleanup procedures, which an ordinary
+session never runs. Both are reached by something the user says — "it is done", or
+`/csync cleanup` — which is the axis this repo uses for what may leave the
+always-read files. The guard that must fire first, verify in the code and extract
+the follow-ups before deleting, stays in `workspace.md` as well.
+
+### An old-shape workspace takes no writes until `cleanup`
+
+**2026-09-14, decided by the user.** Once the notes split and the backlog moved,
+every write a session makes — a trap, a follow-up, a finding sent to the backlog,
+a closing — targets a file an old-shape workspace does not have. Improvising the
+new file splits the record across two shapes, and the migration then copies a
+template over it; writing to the old file keeps feeding the shape both versions
+of the skill misread differently. So neither: until `cleanup` migrates, those
+writes wait in the session report. Working a plan is exempt, since `plan/1` did not
+change.
+
+The migration itself is all-or-nothing and gated on every machine having updated
+the skill, then on the shared global rule being replaced — in that order, since the
+global `CLAUDE.md` is one file in the sync repo that every machine links to, and
+replacing it early hands older skills rules that name files they do not know. A machine on the older skill recreates
+`GRAPH.md` and writes judgments back into `decisions.md`; one on the older global
+rule sends gate-closed sessions to read `GRAPH.md`. A half-migrated workspace is
+the one both read wrong.
+
+### A closed-pipeline log under `docs/archive/` is misfiled
+
+**2026-09-14.** Workspaces were found with the log at `docs/archive/`. No rule ever
+put it there; the likeliest source is the log's kind, `archive/1`, read beside the
+older rule that nothing sits at the root of `docs/`. The kind states the lifetime,
+not the directory, and the ledger now reports the misfiled copy.
 
 ---
 

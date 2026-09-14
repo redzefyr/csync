@@ -5,7 +5,11 @@ documents **look like**, so a program can read them without guessing.
 
 **Copy the template, fill it in. Do not reconstruct it from this prose.**
 `templates/document/` holds a real file for every shape below, and `init` scaffolds
-`GRAPH.md` and both `notes/` files. A `cp` does not drift.
+both `notes/` files and `backlog.md`. A `cp` does not drift.
+
+**The reader is `scripts/csync-ledger.sh`.** It lists plans, backlog, docs and
+gauges from these shapes, resolves slugs, and reports what is out of shape. What
+this file calls machine-read, that script reads.
 
 ⚠️ **`rationale.md` holds why these shapes are what they are.** Read it only when
 changing one of them.
@@ -25,18 +29,20 @@ which the user asks for by name.
 
 | `csync:` | file |
 |---|---|
-| `graph/1` | `GRAPH.md` |
 | `plan/1` | `plans/*.md` |
-| `note/1` | `notes/*.md` |
+| `note/2` | `notes/decisions.md`, `notes/knowledge.md` |
+| `backlog/1` | `backlog.md` |
 | `design/1` | `docs/design/**` — live |
-| `archive/1` | `docs/archive/**` — archive, **optional**, see below |
+| `archive/1` | `docs/archive/**` and `docs/closed-pipelines.md` — archive, **optional**, see below |
 
 The skill updates at a different moment on every machine, so **a reader that meets
 `plan/2` and only knows `plan/1` must say so** rather than parse it as best it can.
 
 **Legacy kind names.** `doc/1` is the old name for `design/1`, `research/1` for
-`archive/1`. A reader **accepts both and reports the old ones as legacy**;
-`cleanup` renames them along with the directories, and nothing else does.
+`archive/1`. `note/1` is the old notes format — `decisions` holding all three
+authorities, and a separate `traps` file. `graph/1` is `GRAPH.md`, which is retired
+(below). A reader **accepts all of them and reports them as legacy**; `cleanup`
+migrates them, and nothing else does.
 
 `CLAUDE.md` gets **no frontmatter** — it is instructions to Claude, not a document
 in this sense, and it is excluded from conformance.
@@ -58,6 +64,20 @@ creates a second authority, and the two drift.
 
 **5. Frontmatter carries fields, never the document.** A value that is growing
 paragraphs belongs in the body.
+
+**6. A file read at every session start, or piling up between sessions, declares
+its own `gauge`:**
+
+```yaml
+gauge: 300/      # max 300, no alarm
+gauge: /200      # no max, alarm past 200
+```
+
+`<max>/<alarm>`, whole numbers, either side left empty for "none". The unit is
+**lines of the whole file** — `wc -l`, frontmatter and header included, because
+that is what a session reads. The value lives in the file it governs so it is in
+context whenever that file is, and so a project can move it without touching a
+copy anywhere else. What happens past each is `workspace.md`'s ("Gauges").
 
 ## `plan/1`
 
@@ -102,7 +122,7 @@ appear once. A body sentence that happens to read like a status is just a senten
 ## findings — carried over from other work (judge each, then delete it)
 
 Each entry gets one of three verdicts before this session's own work:
-**promote** into the body · **backlog** in `GRAPH.md` · **reject** in one line.
+**promote** into the body · **backlog** in `backlog.md` · **reject** in one line.
 Then the entry goes. An entry still sitting here reads as *not yet judged*.
 
 ### YYYY-MM-DD · found while working on <what>
@@ -120,48 +140,97 @@ A few lines of body.
   plan whose session may never load these rules
 
 ⚠️ **A block in any other shape is read as zero pending findings**, and zero reads
-as "nothing waiting". Copy
-`~/.claude/skills/csync/templates/document/findings-entry.md`.
+as "nothing waiting" — the ledger shows a block with no `###` entries as `?` for
+that reason. Copy `~/.claude/skills/csync/templates/document/findings-entry.md`.
 
-## `note/1`
+⚠️ **Older blocks say `backlog in GRAPH.md`.** The prose travels with the block, so
+copies written before `GRAPH.md` was retired are still sitting in plans. Read it as
+`backlog.md`; `cleanup` rewrites the line.
+
+## `note/2`
+
+The two files split by **whose** entries they hold, because that decides who may
+revise one: `decisions` is the user's, `knowledge` is Claude's.
 
 ```yaml
 ---
-csync: note/1
+csync: note/2
 kind: decisions
+gauge: /200
 why_marker: |
   Why.
 authority_markers:
   mandate: |
     mandate
-  judgment: |
-    judgment
   held: |
     held
 ---
 ```
 
+```yaml
+---
+csync: note/2
+kind: knowledge
+gauge: 300/
+why_marker: |
+  Why.
+entry_markers:
+  judgment: |
+    judgment
+  trap: |
+    trap
+---
+```
+
 | key | |
 |---|---|
-| `kind` | **`decisions` · `traps`** |
+| `kind` | **`decisions` · `knowledge`** |
+| `gauge` | rule 6. The template values are defaults, not the user's ceiling |
 | `why_marker` | the bold run that opens the reason paragraph, in this file's language — declared per file because the corpus is not written in English. Defaults to `Why.` |
-| `authority_markers` | `decisions` only. The three authority tokens, in this file's language, declared for the same reason `why_marker` is. The keys are fixed — **`mandate` · `judgment` · `held`** — and the values are what appears in an entry |
+| `authority_markers` | `decisions` only. The keys are fixed — **`mandate` · `held`** — and the values are the tokens that appear in an entry, in this file's language |
+| `entry_markers` | `knowledge` only. The keys are fixed — **`judgment` · `trap`** — declared for the same reason |
 
-**The body is a flat list of `##` entries, one entry per decision or trap.** No
-nesting: an entry that needs subsections is a `docs/` document with a one-line note
-pointing at it.
+**The body is a flat list of `##` entries.** No nesting: an entry that needs
+subsections is a `docs/` document with a one-line note pointing at it.
 
-**A `decisions` entry must contain a paragraph opening with `why_marker` in bold.**
-That is what makes "a decision records why" checkable, so a tool can show which
-decisions have none.
+**Every heading ends in a token in parentheses.** In `decisions`,
+`(<YYYY-MM-DD> · <authority>)`. In `knowledge`, `(<YYYY-MM-DD> · <kind>)` — or
+`(<kind>)` alone for a trap migrated from `note/1`, which carried no date:
+⚠️ **a date is never invented to fill the slot.**
 
-**A `decisions` entry's `##` heading ends in `(<date> · <authority>)`**, where
-the authority is one of that file's `authority_markers` values. That is what
-makes "who may revise this" checkable — the higher-stakes half, because a missing
-`why` costs a re-derivation while a missing authority costs either a reversed
-mandate or a frozen guess. ⚠️ **An entry with no authority token is `held`, never
-`judgment`** — reading an unmarked entry as Claude's own is how a user's decision
-gets revised without anyone choosing that, and it fails silently.
+**A `decisions` entry, and a `knowledge` entry marked `judgment`, must contain a
+paragraph opening with `why_marker` in bold.** That is what makes "a decision
+records why" checkable.
+
+⚠️ **An entry in `decisions` with no authority token is `held`, never Claude's.**
+Reading an unmarked entry as Claude's own is how a user's decision gets revised
+without anyone choosing that, and it fails silently. An entry in `knowledge` with
+no kind token is reported as deviating, and `cleanup` marks it: `judgment` when
+it carries a `why_marker` paragraph, `trap` otherwise.
+
+**`note/1`**, the legacy shape: `decisions` declared a third authority,
+`judgment`, and traps lived in `kind: traps`. `cleanup` moves every entry marked
+`judgment` into `knowledge` unchanged — its heading already ends in
+`(<date> · <judgment>)` — appends `(<trap>)` to each trap's heading, and leaves
+`held` entries where they are. That holds only because the new file's
+`entry_markers.judgment` and `why_marker` are first set to the old `decisions.md`
+values, and `trap` to a word in the same language (`cleanup.md`, step 0).
+
+## `backlog/1`
+
+```yaml
+---
+csync: backlog/1
+gauge: 50/
+---
+```
+
+**Every line opening with `- ` is an item, and nothing else in the file uses one.**
+An item is `- YYYYMMDD <what>`, dated the day it was listed — the date is what lets
+"untouched through several cleanups" be read off the file rather than remembered.
+A legacy item with no date gets the date of the cleanup that migrates it: that
+reads as "listed since at least", which is true, where any earlier date would be a
+guess.
 
 ## `design/1` — live
 
@@ -183,7 +252,9 @@ the document is not design** — it is either the judgment of a day, which is
 
 Archive documents are ordinary markdown: the judgment of a day, revised by nothing,
 with nothing for a tool to track. Frontmatter is optional and carries at most one
-key.
+key. The title line **`# <title> — YYYY-MM-DD`** is what the ledger lists the
+document by, so the template's shape is worth keeping even where frontmatter is
+left out.
 
 ```yaml
 ---
@@ -198,67 +269,31 @@ An overturned archive document is marked *"as of then"* rather than deleted
 **excluded from conformance reporting** — plain markdown is correct here, and
 flagging it would train people to ignore the report.
 
-## `graph/1`
+## `GRAPH.md` — retired
 
-```yaml
----
-csync: graph/1
----
-```
+There is no index file. `csync-ledger.sh` derives what `GRAPH.md` used to hold —
+plans with status, next step, findings count and pairs; the backlog; docs with
+their titles and `revise_when`; slug resolution — from the documents themselves,
+each time it runs, and writes nothing.
 
-`GRAPH.md` is the index, and an index must live in exactly one place — so its
-content stays in the body where a reader sees it, and the frontmatter only says
-what the file is. What is exact is the **skeleton**:
+📌 **Slugs resolve from filenames** — `plans/<planned>-<advanced>-<slug>.md`, the
+basename everywhere else — and a closed slug from its line in
+`docs/closed-pipelines.md`. There is no second authority to keep in step.
 
-```markdown
-## plans — <free prose subtitle>
-### [[slug]] · planned YYYYMMDD → advanced YYYYMMDD · **status**
-<free prose, emoji markers and all>
+A `GRAPH.md` still in a workspace is the legacy shape, reported by the ledger. Its
+backlog goes to `backlog.md`, prose under a plan's entry goes into that plan if it
+still holds, and the file is deleted — by `cleanup`, when the user asks for it.
 
-## docs — <free prose subtitle>
-### design
-- [[slug]] `docs/design/<path>` — one line
-### archive
-- [[slug]] YYYYMMDD — one line
-
-## notes — <free prose subtitle>
-- [[slug]] — one line
-
-## backlog — <free prose subtitle>
-- one line
-
-## closed pipelines
-`docs/closed-pipelines.md` — closed slugs resolve there
-```
-
-- **section headings are h2 and begin with a key from a closed set** —
-  `plans` · `docs` · `notes` · `backlog` · `closed`. Anything after the key,
-  usually ` — ` and a sentence, is free
-- **plan entries are h3 and open with `[[slug]]`**
-- **`closed` carries no entries** — it names `docs/closed-pipelines.md`
-  and stops. That file holds the lines, one per pipeline; copy
-  `templates/document/closed-pipelines.md` on the first close
-
-📌 **A path written next to a slug is for the reader. A tool must not read it.**
-Slugs resolve from filenames (`plans/<planned>-<advanced>-<slug>.md`, basename
-elsewhere), so a tool that also looked in `GRAPH.md` would be consulting a second
-authority that nothing keeps in step.
-
-**The filename's dates and `GRAPH.md`'s are `YYYYMMDD`**, so the two can be compared
-by eye. ⚠️ A dashed date *there* is **legacy, not deviating**: read it, say so, and
-leave the rename to `cleanup`. `workspace.md` has the reason for the fixed width.
+**Dates in filenames and in backlog items are `YYYYMMDD`**, compared and sorted by
+a program. ⚠️ A dashed date in a filename is **legacy, not deviating**: read it, say
+so, and leave the rename to `cleanup`. `workspace.md` has the reason for the fixed
+width.
 
 ⚠️ **This does not reach into document bodies.** The `## findings` heading stays
-`### YYYY-MM-DD · <what>`, and so do dates in note entries and archive titles —
+`### YYYY-MM-DD · <what>`, and so do dates in note headings and archive titles —
 they are read, not compared against a filename. Changing the findings shape would
 be the worst kind of edit: a block in any other shape counts as **zero** pending
 findings, so every existing hand-off would go silently missing.
-
-⚠️ **The body under an entry stays free, deliberately.** Only the skeleton above is
-structure; everything else is rendered as written, and a line a tool cannot
-classify is **displayed, never dropped** — dropping raises no error, and the reader
-concludes it was never written. Free is not unbounded: a tool renders whatever it
-finds, but **how many lines belong there is `workspace.md`'s cap.**
 
 ## Emoji markers — a closed vocabulary
 

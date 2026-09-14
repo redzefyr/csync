@@ -124,7 +124,7 @@ does not go in `SKILL.md`. The same split governs the sync repo's own two root
 files — see its `CLAUDE.md` and `README.md`.
 
 `references/workspace.md` is the source of truth for how a workspace is
-organised. When a rule about `plans/`, `notes/`, `docs/` or `GRAPH.md` changes, it
+organised. When a rule about `plans/`, `notes/`, `docs/` or `backlog.md` changes, it
 changes there — not in a second copy inside `SKILL.md`.
 
 ### What may move to `references/`

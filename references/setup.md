@@ -161,12 +161,17 @@ Bash($TOOL/scripts/csync-push.sh:*)
 Scoped to the three scripts on purpose. A blanket `git push` allowance would
 cover every repo on the machine.
 
-**7. Offer the global rule that makes the workspace get read.** Nothing loads
-`$WS/CLAUDE.md` on its own — it is not one of the paths Claude Code picks up
-automatically. What makes it deterministic is a rule in the user's global
-`CLAUDE.md` telling Claude to read the workspace when a project has one.
+**7. Offer the global rule that makes the workspace get read.** Nothing reads
+`$WS/notes/` at session start on its own. What makes it deterministic is a rule in
+the user's global `CLAUDE.md`: read `notes/` in every session, and nothing else
+under the workspace until the user runs `/csync` — the read gate.
 `templates/repo/global-rules.md` is that rule; substitute `{{WS}}` and offer to
 append it to `$REPO/global/CLAUDE.md`.
+
+`$WS/CLAUDE.md` needs no rule of its own: Claude Code loads a subdirectory's
+`CLAUDE.md` when a file under it is read with the Read tool, so it arrives with the
+first note (observed 2026-09 for a dot-directory, a globally git-ignored one and a
+nested clone alike; a shell `cat` did not trigger it).
 
 Skip this only if the user declines. **Without it, `init` produces a workspace
 that no session ever opens.** Do not reach for a hook or `CLAUDE.local.md`
@@ -198,17 +203,19 @@ project directory's basename. Refuse if `$WS/` already exists.
    mkdir -p "$WS/docs/design" "$WS/docs/archive" "$WS/plans" "$WS/notes"
    touch "$WS/docs/design/.gitkeep" "$WS/docs/archive/.gitkeep" "$WS/plans/.gitkeep"
    cp "$TOOL/templates/workspace/gitignore" "$WS/.gitignore"
-   cp "$TOOL/templates/workspace/CLAUDE.md" "$TOOL/templates/workspace/GRAPH.md" "$WS/"
+   cp "$TOOL/templates/workspace/CLAUDE.md" "$TOOL/templates/workspace/backlog.md" "$WS/"
    cp "$TOOL/templates/workspace/notes/"*.md "$WS/notes/"
    ```
 
-   Replace `{{NAME}}`, `{{DATE}}` and `{{WS}}` in the copied files, and
-   `{{DESCRIPTION}}` with one line about the project. Commit, then
+   Replace `{{NAME}}` and `{{WS}}` in the copied files, and `{{DESCRIPTION}}` with
+   one line about the project. Commit, then
    `git -C "$WS" push -u origin "prj/<name>"`.
 
-   `GRAPH.md` and both `notes/` files are created **even though they are empty**.
-   Without `GRAPH.md` the next session has no entry point, and the place it gets
-   improvised is `notes/`.
+   Both `notes/` files and `backlog.md` are created **even though they are
+   empty**: their headers carry the entry rules and the `gauge`, and a file
+   improvised later carries neither. ⚠️ **Keep the workspace `CLAUDE.md` to the
+   description and project facts** — it is loaded whenever a note is read, so
+   every line in it is charged to every session.
 4. Append the project root to `~/.claude/csync-projects` if it is not already
    listed. This is **not** what makes the project sync — both halves resolve
    their project from `$PWD`. It is the list `/csync remote` repoints, and it is
@@ -223,10 +230,18 @@ project directory's basename. Refuse if `$WS/` already exists.
    so a project the repo already knows from another machine has **no memory link
    here until this runs** — Claude then writes memories into an unsynced local
    directory and they are lost on the next machine.
-8. **Tell them to start a new session, and say why.** `init` finishes with the
-   workspace on disk and nothing reading it: `$WS/CLAUDE.md` is not one of the
-   paths a session picks up on its own, the global rule that opens it was loaded
-   at session start, and step 7's memory symlink arrived after this session had
+8. **Check the global rule before finishing.** Compare the csync section of
+   `$REPO/global/CLAUDE.md` with `$TOOL/templates/repo/global-rules.md` by the rules
+   it states, not its wording — the list is `references/cleanup.md` step 0.2. If a
+   rule is missing, **say what that means for this workspace** (no notes read, or
+   no gate), and propose the missing rules as an edit to the existing section, in
+   its own language. Only when there is no csync section at all, offer the text
+   `setup` step 7 offers. ⚠️ **Never add a second section** — the old one would
+   still tell sessions to read `GRAPH.md`, beside the new one's gate. ⚠️ If the user runs other machines, the order in `references/cleanup.md`
+   step 0 applies: skills updated first, then the shared rule
+9. **Tell them to start a new session, and say why.** `init` finishes with the
+   workspace on disk and nothing reading it: the global rule that reads `notes/`
+   was loaded at session start, and step 7's memory symlink arrived after this session had
    already resolved where memories go. So the project is connected and this
    session still behaves as though it were not — which looks like `init` having
    silently failed. It did not; it takes effect next session.

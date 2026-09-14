@@ -162,6 +162,8 @@ that looks live and is not:
 | `SKILL.md`, `references/` | **this session keeps running the old copy** — it was loaded at session start. The new rules apply from the next session |
 | `scripts/` | re-run `$TOOL/scripts/install.sh`, `--dry-run` first. A renamed or added script leaves the SessionStart hook pointing at a path that no longer exists |
 | `templates/` | scaffolding for **new** workspaces only. Workspaces that already exist are never rewritten, and nothing goes back to update them |
+| `templates/repo/global-rules.md` | the csync section of the global `CLAUDE.md` is the user's and may still state the old rules. **Compare the rules it states with the template's, not the text** — a translation, the user's own wording and added bullets are current. The global `CLAUDE.md` lives in the sync repo and every machine links to the same copy, so another machine may already have updated it. Where a rule is missing, propose that edit to the existing section, in its own language, and apply it on a yes; never rewrite the section, and never add a second one. ⚠️ A replacement reaches every machine on their next pull, including ones still on the older skill — so when the workspace format also changed, it waits until the user says every machine has updated |
+| the workspace format (`document-format.md` kinds, `notes/` files, `backlog.md`) | existing workspaces are now in the **old shape**, and the ledger says so. Nothing is written to their `notes/`, `backlog.md` or `GRAPH.md`, and no pipeline is closed there, until `/csync cleanup` migrates them — and cleanup first asks whether every other machine has updated too (`references/cleanup.md`, step 0) |
 
 ## /csync uninstall
 

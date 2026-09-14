@@ -1,4 +1,4 @@
-## {{ONE-LINE TITLE — what is easy to step on}}
+## {{ONE-LINE TITLE — what is easy to step on}} ({{YYYY-MM-DD}} · {{TRAP}})
 
 {{What goes wrong, and what it looks like when it does.}}
 
@@ -7,7 +7,10 @@
 {{What to do instead.}}
 
 <!-- Delete this comment once filled in.
-  Paste as a new `##` entry at the end of notes/traps.md.
+  Paste as a new `##` entry at the end of notes/knowledge.md.
+
+  TRAP is the value declared for `trap` under `entry_markers` in that file's
+  frontmatter, in that file's language.
 
   Prefer traps that FAIL SILENTLY -- the ones that raise no exception and just
   quietly produce a wrong answer. A trap that crashes is found by whoever hits
@@ -20,6 +23,8 @@
   the person about to be wrong, and goes when the code goes. notes/ is for what
   fires from callers that never open the file, from code that is not there, or
   across the whole project.
+
+  After pasting, run ~/.claude/skills/csync/scripts/csync-ledger.sh gauges.
 
   Rules: references/workspace.md ("notes/")
 -->

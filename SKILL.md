@@ -1,6 +1,6 @@
 ---
 name: csync
-description: "Use when the user is asking about Claude's own working state rather than their product code: the global CLAUDE.md, per-project memory, and the workspace directory of plans, notes, decisions, traps and docs. Handles `/csync` and every subcommand (setup, init, sync, list, open, status, pull, push, cleanup, config, remote, update, uninstall). Trigger it when the user can't recall what work is open here, asks which pipelines exist, how far each got, which to resume, or what to read at session start; says notes or plans written on another machine are missing, sets up a fresh machine or a freshly pulled/moved clone, or wonders whether install.sh must run again; has a notes/plans/docs file grown too long, gone stale, or needing closing, renaming, filing; finds one project's work depending on or breaking another project's plan. It also defines how these documents are organised — GRAPH.md entry point, one pipeline per project per session, notes limited to decisions and traps, docs live vs archive — so consult it before creating or moving one."
+description: "Use when the user is asking about Claude's own working state rather than their product code: the global CLAUDE.md, per-project memory, and the workspace directory of plans, notes, backlog and docs. Handles `/csync` and every subcommand (setup, init, sync, list, open, status, pull, push, cleanup, config, remote, update, uninstall). Trigger it when the user can't recall what work is open here, asks which pipelines exist, how far each got, which to resume, or what to read at session start; says notes or plans written on another machine are missing, sets up a fresh machine or a freshly pulled/moved clone, or wonders whether install.sh must run again; has a notes/plans/docs file grown too long, gone stale, or needing closing, renaming, filing; finds one project's work depending on or breaking another project's plan. It also defines how these documents are organised — a derived ledger instead of an index file, one pipeline per project per session, notes split into the user's decisions and Claude's knowledge with a gauge on each, docs live vs archive — so consult it before creating or moving one."
 ---
 
 # csync
@@ -9,7 +9,7 @@ csync keeps two things in one private git repo the user owns:
 
 1. **Claude's global state** — `~/.claude/CLAUDE.md` and the per-project memory
    directories — so a second machine starts where the first left off.
-2. **A workspace directory inside each project** — plans, decisions, traps and
+2. **A workspace directory inside each project** — plans, decisions, knowledge and
    research that belong to the work but not in the project repo.
 
 The second half stands on its own. A single machine with no remote still gets
@@ -91,6 +91,12 @@ Report in whatever language the user is speaking.
 Elaborate only when something needs the user: a diverged history, a push that
 failed after its retry, or anything the scripts sent to stderr.
 
+**A gauge past its max or alarm also needs the user — once per file per session,
+at `open` or the first time a check after a write shows it.** After writing to
+`notes/` or `backlog.md`, run `$TOOL/scripts/csync-ledger.sh gauges` there; what
+follows is "Gauges" in `references/workspace.md`. ⚠️ **Never meet a gauge by
+trimming, and never raise one without a yes.**
+
 Four subcommands sit outside that rule. `cleanup` deletes documents and makes
 judgment calls, so it reports what it did — never run it on your own, wait to be
 asked. `update` and `config` change the rules the next session runs under, so
@@ -145,6 +151,18 @@ would commit half-done work from another window. On the read side it was merely
 harmless, and harmless is a permission, not a reason: a clone nobody commits in
 cannot drift, and the session that opens it pulls it then.
 
+## A workspace in the old shape
+
+The ledger prints `OLD SHAPE` above everything else — for a `GRAPH.md`, a
+`notes/traps.md`, a `notes/decisions.md` that is `note/1` or has no `csync:` key, or a missing
+`notes/knowledge.md` or `backlog.md`. The first three also show in `notes/` at
+session start; **trust the banner over what you noticed**. ⚠️ **Write nothing to
+that workspace's `notes/`, `backlog.md` or `GRAPH.md`, and close no pipeline in it,
+until `/csync cleanup` migrates it** — say what would have been recorded, and that
+cleanup is waiting. Reading and working a plan are unaffected; a finding whose
+verdict is *backlog* stays in its block, and a backlog item is not taken up. Why, and what counts, is "An old-shape
+workspace" in `references/workspace.md`.
+
 ## When `install.sh` must be re-run
 
 `git pull` is enough for anything the repo links **as a whole**: this skill, the
@@ -187,6 +205,10 @@ does not cross unasked. When you hit a gap a wrapper would close:
    arguments, and what the installed program did instead. If the real fix is
    installing the right package, say that first. A wrapper is for when the two
    sides genuinely disagree, not for a missing dependency
+2. **Show the whole script and where it goes** — `$REPO/bin/<name>`, linked to
+   `~/.local/bin/<name>`, pushed to every machine
+3. **Get an explicit yes**
+
 Only then is the wrapper written — into `$REPO/bin/<name>`, linked per-file into
 `~/.local/bin`, so it exists nowhere until `install.sh` runs, and committed with
 everything else. The rules that keep one portable across machines, and the same
@@ -231,8 +253,8 @@ projects may have advanced one and left the other alone, and the untouched one i
 exactly the one whose plans nobody has looked at.
 
 A session has **opened a pipeline** in a project once it is working one of that
-project's plans. Reading `GRAPH.md` and `notes/` at session start is not opening
-one; neither is `cleanup`, `status`, a lookup, working a backlog item, or writing a
+project's plans. Reading `notes/` at session start is not opening one, and
+neither is running the ledger; neither is `cleanup`, `status`, a lookup, working a backlog item, or writing a
 `## findings` block into someone else's plan.
 
 **Why it is conditional and not always.** A session that already has its pipeline
@@ -248,27 +270,28 @@ narrate.
 
 ## /csync list
 
-Render the session's pipelines as a table — **read-only. It never edits anything
-it finds.** One row per file in `<project>/$WS/plans/`:
+Run `$TOOL/scripts/csync-ledger.sh` **from each of the session's project roots
+that has a workspace**, and render its plans as a table under the project's name —
+**read-only. It never edits anything it finds.**
 
-| column | where it comes from |
+| column | from the ledger |
 |---|---|
-| **banner** | `[[<slug>]] · <status>` — slug from the filename's `<slug>` field, status from the plan's frontmatter: `status_note` when it has one, otherwise `status`. A plan with no frontmatter is **legacy** — fall back to a `> **Status**:` line in the body, and say `(legacy)` in the row. One line: trim it and drop the markup left dangling by the trim. ⚠️ **Trim it, never rewrite it** — summarising is rewriting, and a status reworded by a session that did not do the work is indistinguishable from one the session that did wrote, so every session after takes it as fact |
-| **findings** | how many `###` entries sit under that plan's `## findings` heading. Leave it blank when there is no such block. ⚠️ **A block whose entries are in some other shape is `?`, never `0`** — zero reads as "nothing waiting", and under-reporting is the failure this column exists to prevent |
+| **banner** | `[[<slug>]] · <status>` and the `status_note` line, as printed. `(legacy)` rows came from a plan with no frontmatter |
+| **next** | the `next:` line |
+| **findings** | the count, blank when none. ⚠️ **A `?` stays `?`, never `0`** — zero reads as "nothing waiting", and under-reporting is the failure this column exists to prevent |
 
-Order the rows **the way `GRAPH.md` lists them.** That order is a judgment the
-workspace already made — the leading pipeline is first — and re-sorting by date
-throws it away. Plans `GRAPH.md` does not mention go last, most recently
-advanced first.
+⚠️ **Relay the values as printed — trimmed, never rewritten.** The script already
+cut each to its first line. Summarising is rewriting, and a status reworded by a
+session that did not do the work is indistinguishable from one the session that
+did wrote, so every session after takes it as fact.
 
-Cover **every project root this session has open that has a workspace**, one
-table each under the project's name — the same scope as `status` and `sync`.
-
-Two mismatches are free to notice while reading, and both mean the entry point
-is wrong, so **say them in a line under the table**: a plan file that `GRAPH.md`
-does not list, and a `GRAPH.md` entry whose file no longer exists. Report them
-and stop there — repairing the index is `cleanup`'s work, and `cleanup` is the
-user's to ask for.
+**An `OLD SHAPE` line goes above the table, as printed** — that workspace takes no
+writes to `notes/`, `backlog.md` or `GRAPH.md`, and no closing, until cleanup ("A
+workspace in the old shape").
+**Keep the ledger's order** — status, then most recently advanced. Put the backlog
+items under the table as they are printed, and **the "out of shape" lines under
+that, stated and left alone**: repairing them is `cleanup`'s work, and `cleanup` is
+the user's to ask for. Gauges are not part of `list`.
 
 ⚠️ **The table is not a menu.** Printing it does not license starting one of the
 rows: a session with no instruction **asks which pipeline to continue**
@@ -292,17 +315,25 @@ workspace. Do not pick one.
 
 `/csync open <slug>`:
 
-1. **Resolve the slug against the disk** — `$WS/plans/*-<slug>.md` in each of the
-   session's project roots. No match → say so and **stop; do not rename**. A
+1. **Resolve the slug against the disk** — `$TOOL/scripts/csync-ledger.sh resolve
+   <slug>` in each of the session's project roots; only a `plans/` path is a
+   pipeline. No match → say so and **stop; do not rename**. A
    title naming a plan nobody can open is worse than no title, because a sidebar
    is read as fact. A match in two projects → ask which; never guess
-2. **Report the plan's header** — `status` (with `status_note`), `next` and
+2. **Report the gauges, then the plan's header.** Run `csync-ledger.sh gauges`
+   there and name any file past its max or alarm — once, before anything else
+   ("Reporting"). ⚠️ **Do not fold here** — the session goes on to the plan it
+   opened. `knowledge.md` and `backlog.md` get a proposal; `decisions.md` is only
+   **told**, since what to do with the user's rules is theirs. An `OLD SHAPE` line
+   is said too, with the cleanup it needs. Then the header: `status` (with `status_note`), `next` and
    `blocked`, from its frontmatter. That next step is what this session starts
    on, as written. A legacy plan carries them as a leading blockquote instead;
    read them there and say the plan is legacy — **do not migrate it here**, that
    is `cleanup`'s call
 3. **Fold in `## findings` if the plan has one** — promote, backlog or reject
-   each entry, per `references/workspace.md`. **This is the substance of the
+   each entry, per `references/workspace.md`. A block whose prose says "backlog in
+   `GRAPH.md`" predates the ledger: it means `backlog.md`, and in an `OLD SHAPE`
+   workspace a *backlog* verdict leaves the entry where it is. **This is the substance of the
    command**, not step 4: another session handed those over, and until they are
    folded the next step you just reported may already be stale
 4. **Rename the session — only if `auto_title` is on and this host can.** Read
@@ -310,6 +341,9 @@ workspace. Do not pick one.
    silent case: say nothing and stop here. When it is on, the title format, the
    project prefix it always carries, and what to say on a host with no rename
    tool are in `references/maintenance.md`
+
+**Re-opening the same slug is idempotent**: the findings are already folded, so
+it reduces to step 4. That is the repair path for a title that is wrong or was
 never set, and it is why there is no separate rename command.
 
 **A second `open` in a project that already has one open — ask first.** One
@@ -327,13 +361,13 @@ it with the new entry alone.
 does not make one. A session that has not done steps 1–3 has opened nothing,
 whatever its title says.
 
-**`open` writes nothing to disk except through step 3.** In particular it does
-not touch `GRAPH.md`. That file is the *project's* state — two windows open on
-one project would each stamp their own session over it. Session state lives in
-the session's title.
+**`open` writes nothing to disk except through step 3.** Nothing in the workspace
+records which session has which pipeline open: the workspace is the *project's*
+state, and two windows open on one project would each stamp their own session over
+it. Session state lives in the session's title.
 
 **There is no `close`.** Closing is the four-step judgment in
-`references/workspace.md` — verify in the code, extract the unstarted follow-ups
+`references/cleanup.md` — verify in the code, extract the unstarted follow-ups
 — and wrapping it in a command would make it look like something that can just be
 run. The title also stays as it is when the pipeline closes or the session drifts
 elsewhere: that session's work *was* that plan, and the label stays true after
@@ -380,13 +414,13 @@ good, because nothing re-adds a root except working in it.
 ## /csync cleanup
 
 Prune the current project's workspace so a new session can trust it. **This is a
-judgment task, not a script** — there is nothing to run. The procedure is in
-`references/workspace.md`, under "Closing a pipeline" and "Cleanup".
+judgment task, not a script** — the ledger lists what is out of shape, and deciding
+what to do about each is the work. The procedure is in `references/cleanup.md`.
 
-**Its measure is reduction.** Count what every session reads — `GRAPH.md` plus
-`notes/` — before and after, and report the change as two columns: what pruning
-removed, and what format migration added. A run that ends larger **in the pruning
-column** is a failed cleanup. The unit is lines.
+**Its measure is reduction.** Count what every session reads — `notes/` and the
+workspace `CLAUDE.md` that reading a note loads — before and after, and report the
+change as two columns: what pruning removed, and what format migration added. A run
+that ends larger **in the pruning column** is a failed cleanup. The unit is lines.
 
 ## /csync config [key] [value]
 
@@ -445,12 +479,16 @@ wiring is removed.
 
 # References
 
-- `references/workspace.md` — how a workspace is organised: `GRAPH.md`, `plans/`,
-  `notes/` and who may revise a decision, `docs/`, the `## findings` hand-off, the
-  backlog and when an item there becomes a plan, keeping each workspace
-  self-contained, closing a pipeline, cleanup.
+- `references/workspace.md` — how a workspace is organised: `plans/`, `notes/`
+  and whose entries each file holds, gauges, `docs/`, the `## findings` hand-off,
+  the backlog and when an item there becomes a plan, the ledger, keeping each
+  workspace self-contained.
   **Read this before creating, renaming, filing or deleting any workspace
   document.**
+- `references/cleanup.md` — closing a pipeline and `/csync cleanup`, including
+  migrating an old-shape workspace. **Read it when the user says a pipeline is
+  done, when a backlog item is finished (its distribution table), or when cleanup
+  is asked for.**
 - `references/document-format.md` — what those documents **look like**: the YAML
   frontmatter each kind carries, the exact position of the `## findings` block,
   the emoji vocabulary, and what a tool may and may not read. **Read it before

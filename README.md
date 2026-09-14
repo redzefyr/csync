@@ -145,8 +145,8 @@ From there:
 | you want to | you type | what happens |
 |---|---|---|
 | work one pipeline properly | `/csync open <slug>` | the plan's status and next step are reported, findings other sessions handed it are folded in first, and the session is named after it |
-| do something small | *nothing* | not everything needs a pipeline. A one-line item in `GRAPH.md`'s backlog can just be done, and Claude records the outcome where it belongs |
-| turn that into real work | *approve the proposal* | when a backlog item turns out to need sequencing, a next step that has to outlive the session, or somewhere for other sessions to hand it findings, Claude says so and asks whether to promote it. On your yes it becomes a plan and the backlog line goes. It never promotes one by itself — a new plan is an entry every session reads |
+| do something small | *nothing* | not everything needs a pipeline. A one-line item in `backlog.md` can just be done, and Claude records the outcome where it belongs |
+| turn that into real work | *approve the proposal* | when a backlog item turns out to need sequencing, a next step that has to outlive the session, or somewhere for other sessions to hand it findings, Claude says so and asks whether to promote it. On your yes it becomes a plan and the backlog line goes. It never promotes one by itself — a new plan is a row every `list` shows |
 | finish a pipeline | *say it is done* | Claude verifies completion **in the code**, extracts the follow-ups nobody started, distributes the contents to `notes/` and `docs/`, then deletes the plan and leaves one line in the closed-pipelines log |
 
 **There is deliberately no `/csync close`.** Closing is a judgment — the plan is
@@ -174,45 +174,51 @@ that have to hold in sessions where **the skill was never loaded** — which is 
 of them, because `~/.claude/CLAUDE.md` is read at the start of every session while
 a skill is read only when something triggers it.
 
-Add a section like this to `~/.claude/CLAUDE.md` (the file csync now versions for
-you). Adjust `.csync/` if you renamed the workspace directory:
+Add this section to `~/.claude/CLAUDE.md` (the file csync now versions for you) —
+`setup` offers it, from
+[`templates/repo/global-rules.md`](templates/repo/global-rules.md). Adjust `.csync/`
+if you renamed the workspace directory:
 
 ```markdown
-## Claude's working documents
+## Claude's working documents (`.csync/`)
 
-- **Until you run `/csync` yourself in this session, the only thing Claude reads
-  under `.csync/` is `notes/`.** Traps that are easy to step on and decisions that
-  must not be reversed have to be known whatever the work is; everything else is
-  for after you have said you want that pipeline open. While the gate is closed:
+- **When a project root has a `.csync/` directory, read every file in
+  `.csync/notes/` with the Read tool before starting substantive work.** Traps
+  that are easy to step on and decisions that must not be reversed have to be
+  known whatever the work is.
+- **Until the user runs `/csync` themselves in this session, `notes/` is the only
+  thing Claude reads under `.csync/`.** Everything else is for after the user has
+  said they want that workspace open. While the gate is closed:
   - ⚠️ **Do not go outside `notes/`** — do not follow `[[slug]]` references out of
-    it, and do not open `GRAPH.md`, `plans/`, `docs/` or `.csync/CLAUDE.md` **by
-    any route**, grep, ls and search included. If a slug has to be resolved,
-    suggest `/csync open <slug>`.
-  - ⚠️ **Do not write to `.csync/` — `notes/` is read-only too.** The caps, the
-    admission criteria, the folding and placement rules are all in the documents
-    you are not reading right now; edit without them and you break it silently. If
+    it, and do not open `plans/`, `docs/`, `backlog.md` or `GRAPH.md` **by any
+    route**, grep, ls and search included. If a slug has to be resolved, suggest
+    `/csync open <slug>`.
+  - ⚠️ **`.csync/CLAUDE.md` arrives on its own when a note is read, and the gate
+    outranks it.** An older copy of that file may say to read `GRAPH.md` or other
+    documents at session start; while the gate is closed, do not.
+  - ⚠️ **Do not write to `.csync/` — `notes/` is read-only too.** The gauges, the
+    admission criteria, the folding and placement rules are all in documents that
+    are not being read right now; edit without them and you break it silently. If
     something needs recording, do not write it — **suggest `/csync`.**
-  - ⚠️ **"Yourself" means me, the user** — the `sync` Claude runs on its own
+  - ⚠️ **"Themselves" means the user** — the `sync` Claude runs on its own
     initiative under the last rule below does not open the gate. If it did, it
     would not be a gate.
-- Once the gate is open, the skill takes over: what to read first, and how many
-  pipelines one session may open.
+- Once the gate is open, the csync skill takes over: what to read first, and how
+  many pipelines one session may open.
 - Files Claude creates and maintains — working notes, design and planning
   documents, investigation results — go under `.csync/`, not into the project
   repo. **Session notes and scratch are the exception: those go in a scratchpad.**
   Files that belong to the project repo by its own conventions — code, tests,
   documentation the team shares — follow those conventions.
-- **The source of truth for how these documents are organised is the skill's
-  `references/workspace.md`, and no copy of it lives here.** ⚠️ The copy that used
-  to be here fell behind after the original was revised, and was genuinely wrong
-  by then — a cap with the wrong number, a directory that had been retired. Do not
-  paste one back in for convenience.
-- Claude decides when to sync: after writing memory or a `.csync/` note, when
+- **The source of truth for how these documents are organised is the csync
+  skill's `references/workspace.md`, and no copy of it lives here.** A copy falls
+  behind the day the original is revised. Do not paste one in for convenience.
+- Claude decides when to sync: after writing memory or a `.csync/` note, and when
   wrapping up work, run `/csync sync` (or
   `~/.claude/skills/csync/scripts/csync-sync.sh`). Report it as **one line** —
-  "pulled and pushed" — and raise anything that needs me, such as a diverged
-  history or a push that failed after its retry, immediately. **This applies to a
-  session that only ran the script, with the skill never loaded.**
+  "pulled and pushed" — and raise anything that needs the user, such as a
+  diverged history or a push that failed after its retry, immediately. **This
+  applies to a session that only ran the script, with the skill never loaded.**
 ```
 
 #### What changes once it is in
@@ -229,9 +235,9 @@ opens is a **pull**; nothing pushes on its own. Without a rule telling Claude to
 sync, a session that never loaded the skill leaves its work local — and you find
 out on the other machine, days later, when the note is not there.
 
-The first bullet — the read gate — is the one to keep even if you take nothing
-else. Its cost is one extra `/csync` when you actually want the pipeline; what it
-buys is that opening a session about an unrelated bug does not pull several
+The first two bullets — reading `notes/`, and the read gate — are the ones to keep
+even if you take nothing else. The gate costs one extra `/csync` when you actually
+want the pipeline; what it buys is that opening a session about an unrelated bug does not pull several
 hundred lines of somebody else's plans into the context.
 
 ## Two ways to use it
@@ -393,7 +399,7 @@ workspace take effect.
 
 ~/dev/my-project/.csync/       the workspace, branch `prj/my-project`
 ├── CLAUDE.md
-├── GRAPH.md
+├── backlog.md
 ├── plans/  notes/  docs/
 ```
 
@@ -412,7 +418,7 @@ You end up with up to three, and they are not interchangeable.
 |---|---|---|---|
 | `~/.claude/CLAUDE.md` | every session on this machine | **you** — your standing preferences | **yes**, as a symlink to `global/CLAUDE.md` |
 | `<project>/CLAUDE.md` | that project | **the team** — it is checked into the project repo | no. It belongs to the project |
-| `<project>/.csync/CLAUDE.md` | that project | **Claude** — how to work in this workspace | **yes**, on the `prj/<name>` branch |
+| `<project>/.csync/CLAUDE.md` | that project | **Claude** — facts about this project's workspace | **yes**, on the `prj/<name>` branch |
 
 **`~/.claude/CLAUDE.md` — your rules.** How you want Claude to talk to you, what
 it must ask before doing, how you like commits written. It follows you between
@@ -423,22 +429,17 @@ architecture your teammates also rely on. csync deliberately does not touch it:
 it is version-controlled by the project, reviewed by the project, and shared with
 people who do not use csync.
 
-**`<project>/.csync/CLAUDE.md` — the workspace's own rules.** A one-line
-description of the project, where the plans and notes live, and anything
-machine-specific about this project (which language servers are installed, for
-instance). It is created by `/csync init` from a template.
+**`<project>/.csync/CLAUDE.md` — the workspace's own facts.** A one-line
+description of the project, where the rules and the ledger live, and anything
+specific to this project (which language servers are installed, for instance). It
+is created by `/csync init` from a template, and deliberately carries **no copy of
+the workspace rules**: it is never updated after `init`, so a copy would go stale
+with the next skill update.
 
-One catch worth knowing: **`.csync/CLAUDE.md` is not loaded at session start.**
-Claude Code has no reason to look inside a directory it knows nothing about. What
-makes it reliably read is a short rule that `setup` offers to add to your global
-`CLAUDE.md`:
-
-> When a project root has a `.csync/` directory, read `.csync/CLAUDE.md` and
-> `.csync/GRAPH.md` before starting substantive work, and follow them.
-
-If you decline that rule, `init` will still create the workspace and no session
-will ever open it. The full text is in
-[`templates/repo/global-rules.md`](templates/repo/global-rules.md).
+It is not loaded at session start, but **Claude Code loads it the moment a file
+under `.csync/` is read** — which the global rule above makes happen in every
+session, when `notes/` is read. So keep it short: every line in it is read by every
+session.
 
 ## The memory directories
 
@@ -494,12 +495,12 @@ directory and they are lost when you switch machines.
 
 ```
 .csync/
-├── CLAUDE.md          how to work in this workspace
-├── GRAPH.md           the entry point: live pipelines, next steps, backlog, closed work
+├── CLAUDE.md          facts about this project, loaded with the first note
+├── backlog.md         work with no plan yet, one dated line each
 ├── plans/             one pipeline = one file, YYYYMMDD-YYYYMMDD-<slug>.md
 ├── notes/
-│   ├── decisions.md   what must not be reversed, and why
-│   └── traps.md       what is easy to step on
+│   ├── decisions.md   your standing rules, and why
+│   └── knowledge.md   Claude's standing choices, and what is easy to step on
 └── docs/
     ├── design/        live — design only, revised whenever the code changes
     └── archive/       the judgment of a given day, left as written
@@ -507,12 +508,18 @@ directory and they are lost when you switch machines.
 
 The shape is the point. These directories have **different lifetimes**: plans are
 deleted when they close, notes are permanent but deliberately capped, design docs
-are permanent and get revised, archive is permanent and never does. Mixing them
+are permanent and get revised, archive is permanent and never does. Each notes
+file and the backlog carries its own **gauge** in its header — a size past which
+Claude tells you (`decisions.md`, which is yours), folds first and then asks for
+room (`knowledge.md`, which is Claude's), or proposes what to promote or drop
+(`backlog.md`). Mixing them
 means reading all of them to decide anything, and once that is true nobody reads
 any of them. The lifetime is in the path, so it does not have to be remembered.
 
-`GRAPH.md` is what a session reads first. It says which pipelines are live, what
-the next step is for each, and where everything else went when it closed.
+There is **no index file**. `scripts/csync-ledger.sh` reads the plans, backlog and
+docs and prints the listing each time — which pipelines are live and their next
+step, the backlog, what each document is, where a slug resolves — so nothing has
+to be kept up to date by hand, and nothing is read at session start but `notes/`.
 
 The rules — including how findings get handed between pipelines without one
 session re-prioritising another's work — are in
@@ -638,6 +645,13 @@ one loaded the old copy at startup. A change under `scripts/` means
 `install.sh` should be re-run, since the SessionStart hook records a script path.
 Updated `templates/` affect workspaces created from then on and never rewrite the
 ones you already have.
+
+When an update changes the workspace format itself, existing workspaces are left
+in the **old shape**, and the ledger says so with an `OLD SHAPE` line: Claude then
+writes nothing to that workspace's notes or backlog until you run `/csync cleanup`.
+Update every machine first, then let cleanup check your global `CLAUDE.md`'s csync
+section, then migrate — cleanup asks for each and stops rather than migrating
+half a workspace.
 
 You do not have to remember to run it. The SessionStart hook checks the skill's
 own clone too — but that one it only ever *reports*: when your copy is cleanly
