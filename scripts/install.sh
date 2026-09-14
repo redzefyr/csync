@@ -339,6 +339,87 @@ else
 MANUAL
 fi
 
+# 9. csync's own rules -- the read gate, where Claude's documents go, when to
+#    sync. They have to hold in sessions that never load the skill, so they live
+#    in ~/.claude/rules/, which loads in every session, survives compaction and
+#    reaches subagents. Two files:
+#
+#    csync.md is a link into the tool clone, through the pointer rather than to
+#    $TOOL_ROOT, so a moved clone is repaired by step 2 alone. Being a link, it
+#    changes when the skill does -- never a copy that falls behind.
+#
+#    csync-workspace.md is generated, and does two jobs. It names the workspace
+#    directory, which the linked rules cannot hardcode. And it is a real file, so
+#    it is still loaded when the link above dangles -- which Claude Code skips
+#    without a word -- and can tell the session the rules are missing.
+RULES_DIR="$CLAUDE_DIR/rules"
+RULES_LINK="$RULES_DIR/csync.md"
+RULES_TARGET="$CSYNC_TOOL_POINTER/rules/csync.md"
+WS_RULE="$RULES_DIR/csync-workspace.md"
+WS_RULE_MARK="<!-- csync:generated"
+
+if [ -L "$RULES_LINK" ] && [ "$(readlink "$RULES_LINK")" = "$RULES_TARGET" ]; then
+  echo "ok:       $RULES_LINK (already linked)"
+elif [ -e "$RULES_LINK" ] && [ ! -L "$RULES_LINK" ]; then
+  # Someone's own rules file under our name. link()'s ADOPT would move it into
+  # the tool clone, which is not somewhere their file belongs.
+  echo "SKIP:     $RULES_LINK is a real file, not csync's link." >&2
+  echo "          csync's rules stay uninstalled until it is renamed; then re-run." >&2
+else
+  [ -L "$RULES_LINK" ] && echo "REPOINT:  $RULES_LINK (was -> $(readlink "$RULES_LINK"))"
+  echo "link:     $RULES_LINK -> $RULES_TARGET"
+  act mkdir -p "$RULES_DIR"
+  act ln -sfn "$RULES_TARGET" "$RULES_LINK"
+fi
+
+# The heading this file tells the session to look for is read from the rules
+# themselves, so renaming it there leaves no stale copy here -- only a file that
+# is regenerated on the next run.
+#
+# No heading, no file: a sentinel naming a heading the rules do not carry reports
+# the link broken in every session, working link or not. Leaving the file out
+# (or as it was) loses only the warning.
+RULES_HEADING="$(sed -n 's/^## //p' "$TOOL_ROOT/rules/csync.md" 2>/dev/null | head -1 | tr -d '\r')"
+
+ws_rule() {
+  cat <<EOF
+$WS_RULE_MARK by csync's scripts/install.sh from csync.conf. Edits are
+  overwritten: change workspace_dir with /csync config, then re-run install.sh. -->
+## csync workspace directory
+
+csync's workspace directory is \`$WS/\` in every project.
+
+The rules for it arrive in a second rules file, linked from the installed csync
+skill, under this heading:
+
+"$RULES_HEADING"
+
+⚠️ **If that heading is not in your context beside this one, the link is broken**
+— or this host skips linked rules files, as Cowork sessions do. Then read nothing
+and write nothing under \`$WS/\`, \`notes/\` included: tell the user once, and
+suggest re-running csync's \`scripts/install.sh\`.
+EOF
+}
+
+want="$(ws_rule)"
+if [ -z "$RULES_HEADING" ]; then
+  echo "SKIP:     $WS_RULE -- no '## ' heading in $TOOL_ROOT/rules/csync.md; is this clone complete?" >&2
+elif [ -L "$WS_RULE" ]; then
+  # A link, dangling or not, is never the file this writes -- and writing through
+  # a dangling one would create its target, somewhere outside ~/.claude/rules/.
+  echo "SKIP:     $WS_RULE is a symlink; csync writes a real file here -- remove it, then re-run." >&2
+elif [ -f "$WS_RULE" ] && [ "$(cat "$WS_RULE")" = "$want" ]; then
+  echo "ok:       $WS_RULE (up to date)"
+elif [ -e "$WS_RULE" ] && ! grep -qF "$WS_RULE_MARK" "$WS_RULE" 2>/dev/null; then
+  echo "SKIP:     $WS_RULE exists and was not written by csync -- rename it, then re-run." >&2
+else
+  echo "write:    $WS_RULE (workspace directory: $WS/)"
+  if [ "$DRY" -eq 0 ]; then
+    mkdir -p "$RULES_DIR"
+    printf '%s\n' "$want" > "$WS_RULE"
+  fi
+fi
+
 echo
 if [ "$DRY" -eq 1 ]; then
   echo "plan only -- nothing was changed."

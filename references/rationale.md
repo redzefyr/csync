@@ -1,10 +1,10 @@
 # Why the rules are shaped the way they are
 
-⚠️ **Do not read this file in order to do work.** `workspace.md` and
-`document-format.md` are complete on their own: they are enough to write a
-document, run a subcommand, or tidy a workspace. Read this one only when you are
-**about to change a rule** in either of them, or when the user asks why a rule
-exists.
+⚠️ **Do not read this file in order to do work.** `workspace.md`,
+`document-format.md` and `rules/csync.md` are complete on their own: they are
+enough to write a document, run a subcommand, or tidy a workspace. Read this one
+only when you are **about to change a rule** in any of them, or when the user asks
+why a rule exists.
 
 This file is csync's own archive, and it exists for the reason csync gives its
 users. The rules used to carry their origin incidents inline, so every session
@@ -508,12 +508,12 @@ writes wait in the session report. Working a plan is exempt, since `plan/1` did 
 change.
 
 The migration itself is all-or-nothing and gated on every machine having updated
-the skill, then on the shared global rule being replaced — in that order, since the
-global `CLAUDE.md` is one file in the sync repo that every machine links to, and
-replacing it early hands older skills rules that name files they do not know. A machine on the older skill recreates
-`GRAPH.md` and writes judgments back into `decisions.md`; one on the older global
-rule sends gate-closed sessions to read `GRAPH.md`. A half-migrated workspace is
-the one both read wrong.
+the skill. A machine on the older skill recreates `GRAPH.md` and writes judgments
+back into `decisions.md`. It was also gated on the shared global rule being
+replaced, since an older rule sends gate-closed sessions to read `GRAPH.md`; the
+rules are now per machine and arrive with the skill ("The csync rules are a linked
+rules file"), so what remains is a leftover copy in the global `CLAUDE.md`. A
+half-migrated workspace is the one both read wrong.
 
 ### A closed-pipeline log under `docs/archive/` is misfiled
 
@@ -598,3 +598,62 @@ deviation to anyone. Rules without a feedback loop decay.
 
 A tool that quietly fixed a document would erase the judgment that `cleanup`
 exists to make.
+
+## `rules/csync.md`
+
+### The csync rules are a linked rules file
+
+**2026-09-15.** The read gate, the placement rule and the sync rule used to be a
+section `setup` appended to the user's global `CLAUDE.md`, from a template. That
+made the section a copy, and every consumer paid for it: `init`, `update` and
+`cleanup` each compared it against the template by meaning, since users translate
+and reword it; and because the global `CLAUDE.md` is one file every machine links
+to, replacing it had to wait until every machine ran the new skill.
+
+The rules now live in the tool clone and are linked into `~/.claude/rules/`. Each
+machine then reads the rules of the skill it actually runs, and a new version
+reaches it with the skill instead of by a shared edit. Measured on Claude Code
+2.1.251: a rules file reached through two symlinks loads at session start as
+user memory, reloads after compaction, reaches general-purpose subagents (not
+Explore, like every `CLAUDE.md`), and has its HTML comments stripped. A link whose
+target is gone is skipped **without a warning**.
+
+Rejected on the way:
+
+- **A SessionStart hook printing the rules.** Its context is lost at compaction
+  unless it also matches `compact`, it does not reach subagents, and it arrives as
+  plain context beside a workspace `CLAUDE.md` the gate has to outrank
+- **An `@` import in the global `CLAUDE.md`.** It loads like the file, but imports
+  substitute nothing, so the workspace name could not reach the text, and the
+  import line is still something in the user's file to add, check and remove
+
+The generated `csync-workspace.md` exists because of the silent skip. The link
+alone fails to nothing, and a session with no rules reads the workspace with none
+of its guards. A real file beside it cannot dangle, so it is the one place that
+can say the other is missing.
+
+### The gate is judged by the subagent's own conversation
+
+**2026-09-15.** Once the rules reached subagents, a review asked what a subagent
+should make of a prompt saying the gate is open. Taking the prompt's word turns
+the gate into something Claude opens by writing a sentence, which "themselves
+means the user" exists to rule out — so the test stays the one the gate already
+had: what this conversation shows the user doing. A fork carries the turn where
+the user ran `/csync`, so its gate is open; any other subagent's is closed, and
+the session that has the workspace open hands it what it needs. Measured: a
+general-purpose subagent told the gate was open refused and made no tool calls.
+
+A later review read the same test back onto the main session: once compaction
+summarises the turn where the user ran `/csync`, the literal conversation no
+longer shows it, and a long pipeline would be shut mid-work. The user decided a
+summary that records it still counts. A summary is the harness's record of this
+conversation; a prompt is Claude's claim to a different one.
+
+### A sync Claude starts does not end in `list`
+
+**2026-09-15, decided by the user.** `SKILL.md` ended every sync in a session with
+no open pipeline in `list`, including the syncs Claude runs on its own; the gate
+keeps `plans/` shut until the user runs `/csync`. The table is plan banners, so
+the two contradicted each other in every gate-closed session that wrote a note.
+The gate won: `list` follows a `/csync` the user typed, and a sync Claude starts
+is the script and its one line.

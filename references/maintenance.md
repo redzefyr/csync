@@ -43,7 +43,9 @@ git -C "$REPO" branch -a --list 'prj/*' 'origin/prj/*'
 ```
 
 None → set it, and that is the ordinary case, because `setup` runs `config`
-before anything is connected. Any → **do not write the value.** Say what the
+before anything is connected. `install.sh` writes the name into the excludes line
+and into `~/.claude/rules/csync-workspace.md`, so outside `setup` — which installs
+next anyway — re-run it afterwards. Any → **do not write the value.** Say what the
 migration would be and let the user decide. It is `cleanup`'s kind of task, not a
 setter's.
 
@@ -162,7 +164,7 @@ that looks live and is not:
 | `SKILL.md`, `references/` | **this session keeps running the old copy** — it was loaded at session start. The new rules apply from the next session |
 | `scripts/` | re-run `$TOOL/scripts/install.sh`, `--dry-run` first. A renamed or added script leaves the SessionStart hook pointing at a path that no longer exists |
 | `templates/` | scaffolding for **new** workspaces only. Workspaces that already exist are never rewritten, and nothing goes back to update them |
-| `templates/repo/global-rules.md` | the csync section of the global `CLAUDE.md` is the user's and may still state the old rules. **Compare the rules it states with the template's, not the text** — a translation, the user's own wording and added bullets are current. The global `CLAUDE.md` lives in the sync repo and every machine links to the same copy, so another machine may already have updated it. Where a rule is missing, propose that edit to the existing section, in its own language, and apply it on a yes; never rewrite the section, and never add a second one. ⚠️ A replacement reaches every machine on their next pull, including ones still on the older skill — so when the workspace format also changed, it waits until the user says every machine has updated |
+| `rules/csync.md` | nothing to apply — `~/.claude/rules/csync.md` links to it, so it is in force from this machine's next session, and other machines get theirs with their own update. ⚠️ A session already running can reload it at compaction while it keeps the old `SKILL.md`, so the two may disagree until the next session. A range that **renames its first `##` heading** needs `install.sh` re-run: `csync-workspace.md` names that heading, and until it is regenerated it reports the link as broken. If the range **adds** the rules link — an update from before csync had one — re-run `install.sh` (the `scripts/` row), then offer to remove the csync section from the global `CLAUDE.md` on the terms `setup` step 7 gives in `references/setup.md` |
 | the workspace format (`document-format.md` kinds, `notes/` files, `backlog.md`) | existing workspaces are now in the **old shape**, and the ledger says so. Nothing is written to their `notes/`, `backlog.md` or `GRAPH.md`, and no pipeline is closed there, until `/csync cleanup` migrates them — and cleanup first asks whether every other machine has updated too (`references/cleanup.md`, step 0) |
 
 ## /csync uninstall
@@ -171,7 +173,8 @@ Run `$TOOL/scripts/uninstall.sh --dry-run` first, show the plan, then run it for
 real. Symlinks holding the user's own content — the global `CLAUDE.md` and every
 memory directory — are replaced by real copies, so nothing disappears when the
 sync repo is later deleted. The links that are only wiring are removed outright,
-the skill link at `~/.claude/skills/csync` among them. The sync repo, the project
+the skill link at `~/.claude/skills/csync` and csync's two files in
+`~/.claude/rules/` among them. The sync repo, the project
 workspaces and the tool clone are left in place — deleting those is the user's
 call, and worth saying out loud when you report. When the tool clone *is*
 `~/.claude/skills/csync`, say so too: the skill stays loaded until they remove

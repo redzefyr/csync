@@ -161,22 +161,29 @@ Bash($TOOL/scripts/csync-push.sh:*)
 Scoped to the three scripts on purpose. A blanket `git push` allowance would
 cover every repo on the machine.
 
-**7. Offer the global rule that makes the workspace get read.** Nothing reads
-`$WS/notes/` at session start on its own. What makes it deterministic is a rule in
-the user's global `CLAUDE.md`: read `notes/` in every session, and nothing else
-under the workspace until the user runs `/csync` — the read gate.
-`templates/repo/global-rules.md` is that rule; substitute `{{WS}}` and offer to
-append it to `$REPO/global/CLAUDE.md`.
+**7. Check the rules that make the workspace get read.** Nothing reads
+`$WS/notes/` at session start on its own. What makes it deterministic is csync's
+rules — read `notes/` in every session, and nothing else under the workspace until
+the user runs `/csync` — which step 5 installed into `~/.claude/rules/`:
+`csync.md`, a link to `$TOOL/rules/csync.md`, and `csync-workspace.md`, generated
+with the workspace name. Confirm the install output showed both, not a `SKIP`.
+**Without them, `init` produces a workspace that no session ever opens.**
 
 `$WS/CLAUDE.md` needs no rule of its own: Claude Code loads a subdirectory's
 `CLAUDE.md` when a file under it is read with the Read tool, so it arrives with the
 first note (observed 2026-09 for a dot-directory, a globally git-ignored one and a
 nested clone alike; a shell `cat` did not trigger it).
 
-Skip this only if the user declines. **Without it, `init` produces a workspace
-that no session ever opens.** Do not reach for a hook or `CLAUDE.local.md`
-instead — the global rule is enough, and the alternatives put the same
-instruction in a second place that then has to be kept in step.
+Then look at the global `CLAUDE.md` being adopted. Earlier versions of csync
+appended these rules to it as a section; if one is there, say so and offer to
+remove it — it is a copy that no longer changes when the skill does. ⚠️ **If other
+machines share this sync repo, only once each has run the new `install.sh`**: the
+file reaches them on their next pull, and a machine without the rules link loses
+the rules entirely.
+
+⚠️ **Do not move the rules back into the global `CLAUDE.md` or a SessionStart
+hook**, and do not paste them anywhere for convenience. Either is a second copy,
+and the hook also loses them at compaction.
 
 **8. Tell them what they now have**, briefly: the subcommands they will actually
 use (`init`, `sync`, `open`, `cleanup`), that a SessionStart hook now fast-forwards
@@ -230,18 +237,15 @@ project directory's basename. Refuse if `$WS/` already exists.
    so a project the repo already knows from another machine has **no memory link
    here until this runs** — Claude then writes memories into an unsynced local
    directory and they are lost on the next machine.
-8. **Check the global rule before finishing.** Compare the csync section of
-   `$REPO/global/CLAUDE.md` with `$TOOL/templates/repo/global-rules.md` by the rules
-   it states, not its wording — the list is `references/cleanup.md` step 0.2. If a
-   rule is missing, **say what that means for this workspace** (no notes read, or
-   no gate), and propose the missing rules as an edit to the existing section, in
-   its own language. Only when there is no csync section at all, offer the text
-   `setup` step 7 offers. ⚠️ **Never add a second section** — the old one would
-   still tell sessions to read `GRAPH.md`, beside the new one's gate. ⚠️ If the user runs other machines, the order in `references/cleanup.md`
-   step 0 applies: skills updated first, then the shared rule
+8. **Check the rules before finishing.** Step 7's run must have printed
+   `~/.claude/rules/csync.md` and `csync-workspace.md` as linked, written or
+   `ok` — a `SKIP` means a file of the user's own holds that name, and **this
+   workspace then gets no notes read and no gate**; say so. If the global
+   `CLAUDE.md` still carries a csync section from an earlier version, offer to
+   remove it, on the terms `setup` step 7 gives
 9. **Tell them to start a new session, and say why.** `init` finishes with the
-   workspace on disk and nothing reading it: the global rule that reads `notes/`
-   was loaded at session start, and step 7's memory symlink arrived after this session had
+   workspace on disk and nothing reading it: the rules that read `notes/` were
+   loaded at session start, and step 7's memory symlink arrived after this session had
    already resolved where memories go. So the project is connected and this
    session still behaves as though it were not — which looks like `init` having
    silently failed. It did not; it takes effect next session.

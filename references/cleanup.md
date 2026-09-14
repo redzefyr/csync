@@ -98,16 +98,14 @@ piles up in the old place again.
    the one only the user can answer. An older skill recreates `GRAPH.md`, writes
    judgments back into `decisions.md` and traps into `traps.md` — and step 2's
    change reaches every linked machine, not only the ones that sync this workspace
-2. **The csync section of the global `CLAUDE.md` states the rules
-   `$TOOL/templates/repo/global-rules.md` states.** The global `CLAUDE.md` lives in
-   the sync repo and every machine links to that one copy, so check it yourself —
-   compare, do not ask. Compare **rules, not text**: a translation, the user's own
-   wording and their added bullets all count as current. Where a rule is missing — read
-   `notes/` with the Read tool, `GRAPH.md` and `backlog.md` inside the gate, the
-   gate outranking the workspace `CLAUDE.md` — propose that edit **in the
-   section's own language**, and apply it on a yes. Do it after 1, not before: a
-   machine still on the older skill would receive rules naming files it does not
-   know
+2. **No older copy of the rules is still in force.** csync's rules reach each
+   machine as a link into its own skill (`~/.claude/rules/csync.md`), so updating
+   the skill updated them. What can still send a gate-closed session to
+   `GRAPH.md` is a leftover **csync section in the global `CLAUDE.md`**, from
+   before the rules were linked — check it yourself, do not ask. If one is there,
+   propose removing it, and apply it on a yes. Do it after 1, not before: the
+   global `CLAUDE.md` is shared, and a machine that has not run the new
+   `install.sh` has no rules link to fall back on
 
 **Without both, cleanup stops here and writes nothing** — not the migration, not
 steps 1–8, which distribute into and prune files that do not exist yet in the new

@@ -106,6 +106,21 @@ PYEOF
   fi
 fi
 
+# csync's rules. Wiring, not content -- the rules name /csync and a workspace
+# gate, and mean nothing once csync is gone -- so removed, not copied. Only what
+# install.sh made: the link pointing at csync.md through the tool pointer, and
+# the generated file carrying its marker.
+RULES_LINK="$CLAUDE_DIR/rules/csync.md"
+if [ -L "$RULES_LINK" ] && [ "$(readlink "$RULES_LINK")" = "$CSYNC_TOOL_POINTER/rules/csync.md" ]; then
+  echo "remove:   $RULES_LINK"
+  act rm -f "$RULES_LINK"
+fi
+WS_RULE="$CLAUDE_DIR/rules/csync-workspace.md"
+if [ ! -L "$WS_RULE" ] && [ -f "$WS_RULE" ] && grep -qF "<!-- csync:generated" "$WS_RULE" 2>/dev/null; then
+  echo "remove:   $WS_RULE"
+  act rm -f "$WS_RULE"
+fi
+
 echo "remove:   $CSYNC_POINTER"
 act rm -f "$CSYNC_POINTER"
 if [ -L "$CSYNC_TOOL_POINTER" ]; then

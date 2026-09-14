@@ -411,7 +411,7 @@ read from the documents each time:
 
 | | what it shows | used by |
 |---|---|---|
-| *(no argument)* | plans — status, next, findings count, blocked, pairs — then the backlog, then anything out of shape | `list`, and so the end of a `sync` |
+| *(no argument)* | plans — status, next, findings count, blocked, pairs — then the backlog, then anything out of shape | `list`, and so the end of a `sync` the user typed |
 | `docs` | `docs/design/` with each `revise_when`, `docs/archive/` with date and title, the closed-log count | finding the document a task needs |
 | `gauges` | every gauged file against its `<max>/<alarm>` | `open`, and after writing a gauged file |
 | `resolve <slug>` | the file a `[[slug]]` names, or its line in `docs/closed-pipelines.md` | following a reference |

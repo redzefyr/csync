@@ -83,10 +83,14 @@ local-only way out, which is the option users do not know exists.
 ## Reporting
 
 Sync is background plumbing — without csync it would be invisible local state.
-Run `sync` on your own at natural points (after writing memories or workspace
-notes, when wrapping up work) and report it in **one short line**: "csync:
-pulled and pushed". Do not enumerate commits, hashes, or per-repo results.
-Report in whatever language the user is speaking.
+Run it on your own at natural points (after writing memories or workspace notes,
+when wrapping up work) and report it in **one short line**: "csync: pulled and
+pushed". Do not enumerate commits, hashes, or per-repo results. Report in
+whatever language the user is speaking.
+
+⚠️ **A sync you start is `$TOOL/scripts/csync-sync.sh` and its one line — never
+`list`.** The table prints plan banners, and csync's rules keep `plans/` shut until
+the user runs `/csync` themselves; a sync Claude chose to run is not that.
 
 Elaborate only when something needs the user: a diverged history, a push that
 failed after its retry, or anything the scripts sent to stderr.
@@ -101,8 +105,8 @@ Four subcommands sit outside that rule. `cleanup` deletes documents and makes
 judgment calls, so it reports what it did — never run it on your own, wait to be
 asked. `update` and `config` change the rules the next session runs under, so
 they report what changed. `list` **is** its output — a table, printed whole — and
-it is the one of the four that also runs unasked, in the single case `/csync
-sync` names below.
+it is the one of the four that also runs without being named: at the end of a
+`/csync sync` **the user typed**, in the case that section gives.
 
 **`DIVERGED` is the exception that is not a subcommand, and the one that actually
 gets missed.** The
@@ -178,6 +182,7 @@ Re-run `$TOOL/scripts/install.sh` when a **new link** is needed, or one broke:
 | A new wrapper appeared in the sync repo's `bin/` | `~/.local/bin` links are per-file |
 | The workspace shows up as untracked in a project repo | `$WS/` fell out of the global excludes file |
 | The SessionStart pull stopped running | The hook entry in `~/.claude/settings.json` is gone |
+| **The `csync-workspace` rule is in context, but not the rules under the heading it names** | `~/.claude/rules/csync.md` dangles or is missing, and Claude Code skips it without a word. Until it is back, read and write nothing in any workspace — that rule says so too |
 | `/csync` stopped being a command | The link at `~/.claude/skills/csync` is gone. Run the clone's `scripts/install.sh` from a shell — there is no `/csync` left to invoke — and start a new session |
 | **Either clone moved** | Re-running rewrites both pointers, the skill link and the hook path in one shot |
 
@@ -245,8 +250,10 @@ pulls everything (the same traversal the SessionStart hook does), then commits
 and pushes the sync repo plus that directory's workspace. Running it from only
 one root leaves the other project's notes unpushed.
 
-**Then run `list` for each project in which this session has not opened a
-pipeline**, so the run reads `pull → push → list`.
+**When the user typed it — `/csync sync`, or bare `/csync` — then run `list` for
+each project in which this session has not opened a pipeline**, so the run reads
+`pull → push → list`. A sync you started on your own ends at the script's line
+("Reporting").
 
 Judge that condition **per project, not per session**. A session holding two
 projects may have advanced one and left the other alone, and the untouched one is
