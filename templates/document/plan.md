@@ -32,5 +32,5 @@ pairs: []
   Do not leave finished sections here. Keep a one-line conclusion and push the
   evidence into docs/archive/.
 
-  Rules: references/document-format.md
+  Rules: ~/.claude/skills/csync/references/document-format.md
 -->

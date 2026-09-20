@@ -14,5 +14,6 @@ csync: archive/1
   not delete an overturned document — mark the passage "as of then" and add what
   changed. This is the one directory where that is the rule.
 
-  Rules: references/workspace.md ("docs/"), references/document-format.md
+  Rules: ~/.claude/skills/csync/references/workspace.md ("docs/"),
+         ~/.claude/skills/csync/references/document-format.md
 -->

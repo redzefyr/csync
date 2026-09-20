@@ -16,5 +16,6 @@ revise_when: |
   goes to docs/archive/; procedures, surveys and guides belong to the code, so
   they go in the project repo.
 
-  Rules: references/workspace.md ("docs/"), references/document-format.md
+  Rules: ~/.claude/skills/csync/references/workspace.md ("docs/"),
+         ~/.claude/skills/csync/references/document-format.md
 -->

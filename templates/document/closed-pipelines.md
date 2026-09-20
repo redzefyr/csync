@@ -30,5 +30,5 @@ revised afterwards.**
   Newest first, so the file reads from the top and the oldest entries are the
   ones nobody scrolls to. Nothing is deleted from here.
 
-  Rules: references/cleanup.md ("Closing a pipeline")
+  Rules: ~/.claude/skills/csync/references/cleanup.md ("Closing a pipeline")
 -->

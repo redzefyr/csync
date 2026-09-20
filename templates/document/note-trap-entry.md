@@ -26,5 +26,5 @@
 
   After pasting, run ~/.claude/skills/csync/scripts/csync-ledger.sh gauges.
 
-  Rules: references/workspace.md ("notes/")
+  Rules: ~/.claude/skills/csync/references/workspace.md ("notes/")
 -->

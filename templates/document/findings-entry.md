@@ -25,7 +25,7 @@ Then the entry goes. An entry still sitting here reads as *not yet judged*.
   When the last entry goes, delete this block, heading and all. A block left
   with no entries is counted as `?` -- a hand-off in some unreadable shape.
 
-  Rules: references/workspace.md ("## findings")
+  Rules: ~/.claude/skills/csync/references/workspace.md ("## findings")
 -->
 
 <!-- Delete this comment once filled in. It is for the finder, not the folder.
