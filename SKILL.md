@@ -93,7 +93,8 @@ whatever language the user is speaking.
 the user runs `/csync` themselves; a sync Claude chose to run is not that.
 
 Elaborate only when something needs the user: a diverged history, a push that
-failed after its retry, or anything the scripts sent to stderr.
+failed after its retry, or any other line the scripts print beyond their
+per-clone result.
 
 **A gauge past its max or alarm also needs the user — once per file per session,
 at `open` or the first time a check after a write shows it.** After writing to

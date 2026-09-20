@@ -261,6 +261,12 @@ done
 # 8. SessionStart hook -> the tool repo's pull script. The path is the skill's
 #    own directory, not the sync repo's, so moving the sync repo never breaks
 #    the hook.
+#
+#    The matcher is a regex over the session's source. `startup|resume` covers
+#    both ways a session begins with nothing in flight. `clear` and `compact`
+#    are deliberately left out: they fire mid-session, and this hook
+#    fast-forwards -- moving files under work already in progress. Reporting
+#    without pulling would be a different script, not a wider matcher.
 HOOK_CMD="$TOOL_ROOT/scripts/csync-pull.sh"
 SETTINGS="$CLAUDE_DIR/settings.json"
 
@@ -269,6 +275,7 @@ register_hook_python() {
 import json, os, sys
 
 path, cmd, dry = sys.argv[1], sys.argv[2], sys.argv[3] == "1"
+HOOK_MATCHER = "startup|resume"
 data = {}
 if os.path.exists(path):
     with open(path) as f:
@@ -289,7 +296,7 @@ for e in entries:
     e["hooks"] = [h for h in e.get("hooks", []) if keep(h)]
     if e["hooks"]:
         kept.append(e)
-kept.append({"matcher": "startup", "hooks": [{"type": "command", "command": cmd}]})
+kept.append({"matcher": HOOK_MATCHER, "hooks": [{"type": "command", "command": cmd}]})
 
 if json.dumps(kept, sort_keys=True) == before:
     print("ok:       SessionStart hook already registered")
@@ -319,7 +326,7 @@ register_hook_jq() {
       ((.hooks.SessionStart // [])
         | map(.hooks = ((.hooks // []) | map(select((.command // "") | endswith("csync-pull.sh") | not))))
         | map(select((.hooks | length) > 0)))
-      + [{matcher: "startup", hooks: [{type: "command", command: $cmd}]}]
+      + [{matcher: "startup|resume", hooks: [{type: "command", command: $cmd}]}]
     )' "$SETTINGS" > "$tmp" && mv "$tmp" "$SETTINGS"
 }
 
@@ -332,7 +339,7 @@ else
   cat >&2 <<MANUAL
   "hooks": {
     "SessionStart": [
-      { "matcher": "startup",
+      { "matcher": "startup|resume",
         "hooks": [ { "type": "command", "command": "$HOOK_CMD" } ] }
     ]
   }

@@ -33,6 +33,19 @@ HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(csync_repo)" || exit 0   # not installed: nothing to pull
 WS="$(csync_workspace "$REPO_ROOT")"
 
+# ⚠️ Channel, not wording: at session start, **only stdout is read.**
+#
+# This script is the SessionStart hook, and Claude Code injects a hook's stdout
+# into the session's context; stderr is recorded in the transcript and rendered
+# to nobody who can act on it (measured against Claude Code 2.1.277). So a line
+# a session has to act on goes to stdout, and stderr is left for what fixes
+# itself on the next run -- being offline, and nothing else.
+#
+# Every line here was on stderr until 2026-09-20, which meant the divergence
+# warning below reached a session only when someone ran sync by hand. It was
+# added after a split went unnoticed for two days; at session start -- the case
+# it exists for -- it had never once been delivered.
+
 # Fast-forward one clone, naming precisely what stopped it:
 #   unreachable  -> offline, harmless, retried next run
 #   ahead+behind -> DIVERGED, needs a decision (references/divergence.md)
@@ -51,14 +64,14 @@ pull_one() {
   behind="${counts##*[[:space:]]}"
 
   if [ "$ahead" -gt 0 ] && [ "$behind" -gt 0 ]; then
-    echo "csync: DIVERGED $label -- local $ahead / remote $behind" >&2
-    echo "csync:   sync cannot complete until this is settled, and each run adds one more local commit" >&2
+    echo "csync: DIVERGED $label -- local $ahead / remote $behind"
+    echo "csync:   sync cannot complete until this is settled, and each run adds one more local commit"
     return 0
   fi
 
   if [ "$behind" -gt 0 ]; then
     git -C "$dir" merge --ff-only --quiet '@{upstream}' 2>/dev/null \
-      || echo "csync: $label -- fast-forward failed (check the working tree)" >&2
+      || echo "csync: $label -- fast-forward failed (check the working tree)"
   fi
   return 0
 }
@@ -92,9 +105,9 @@ check_tool_update() {
   git -C "$dir" rev-parse --verify --quiet '@{upstream}' >/dev/null 2>&1 || return 0
 
   if ! git -C "$dir" merge-base HEAD '@{upstream}' >/dev/null 2>&1; then
-    echo "csync: tool clone shares no history with origin -- it was rewritten." >&2
-    echo "csync:   nothing local is broken and there is no work here to rescue," >&2
-    echo "csync:   but no pull will succeed again. Re-clone, or reset --hard to origin." >&2
+    echo "csync: tool clone shares no history with origin -- it was rewritten."
+    echo "csync:   nothing local is broken and there is no work here to rescue,"
+    echo "csync:   but no pull will succeed again. Re-clone, or reset --hard to origin."
     return 0
   fi
 
@@ -104,8 +117,8 @@ check_tool_update() {
 
   [ "$ahead" -eq 0 ] && [ "$behind" -gt 0 ] || return 0
 
-  echo "csync: tool update available -- $behind commit(s) behind origin." >&2
-  echo "csync:   run /csync update to apply it and see what changed" >&2
+  echo "csync: tool update available -- $behind commit(s) behind origin."
+  echo "csync:   run /csync update to apply it and see what changed"
 }
 
 pull_one "$REPO_ROOT" "sync repo"
