@@ -76,10 +76,13 @@ doc_facts() {
   awk '
     function emit(k, v) { if (!(k in seen)) { seen[k] = 1; printf "%s\t%s\n", k, v } }
     # A line Markdown would carry on as paragraph text. Headings, tables,
-    # quotes, fences, comments and rules start or end blocks of their own.
+    # fences, comments and rules start or end blocks of their own. A quoted
+    # line is judged by what follows its `>`: the paragraph inside a quote
+    # takes an unquoted line as a lazy continuation all the same.
     function prose(s) {
       sub(/^[ \t]+/, "", s); sub(/[ \t]+$/, "", s)
-      if (s == "" || s ~ /^(#|\||>|<!--|```|~~~)/ || s ~ /-->$/) return 0
+      if (s ~ /^>/) { sub(/^(>[ \t]?)+/, "", s); return prose(s) }
+      if (s == "" || s ~ /^(#|\||<!--|```|~~~)/) return 0
       return s !~ /^(---+|\*\*\*+|___+)$/
     }
     # The closed vocabulary in document-format.md. Bytes, not characters:
@@ -89,6 +92,17 @@ doc_facts() {
       return index(s, "📌") == 1 || index(s, "⚠") == 1 || index(s, "✅") == 1 ||
              index(s, "🔁") == 1 || index(s, "🗑") == 1 || index(s, "★") == 1 ||
              index(s, "🔓") == 1 || index(s, "🔗") == 1
+    }
+    # A marker line joined to the paragraph above. A quoted marker line is
+    # inside the quote, so the line above has to be in it too -- a `>` under
+    # unquoted prose opens a quote of its own. Peel one level from each and
+    # judge the rest.
+    function glued_to(a, c) {
+      while (c ~ /^[ \t]*>/) {
+        if (a !~ /^[ \t]*>/) return 0
+        sub(/^[ \t]*>[ \t]?/, "", c); sub(/^[ \t]*>[ \t]?/, "", a)
+      }
+      return marker(c) && prose(a)
     }
     function flush() {
       if (key != "") {
@@ -100,7 +114,7 @@ doc_facts() {
     BEGIN { state = "start"; fm = 0; title = ""; nfind = -1; infind = 0
             blocks = 0; odd2 = 0; odd3 = 0; pend3 = 0; undh3 = 0; legacy = ""
             judg = 0; untok = 0; undated = 0; infence = 0; incomment = 0; lind = -1
-            glued = 0; prevl = "" }
+            glued = 0; prevl = ""; incom = 0 }
     { sub(/\r$/, "") }
     NR == 1 { sub(/^\357\273\277/, "") }
     state == "start" {
@@ -133,13 +147,13 @@ doc_facts() {
       next
     }
     state == "body" {
-      above = prevl; prevl = $0
+      above = prevl; prevl = $0; abovecom = incom; incom = 0
       # Comments first: a fence marker inside a comment is not a fence.
-      if (incomment) { if ($0 ~ /-->/) incomment = 0; next }
+      if (incomment) { incom = 1; if ($0 ~ /-->/) incomment = 0; next }
       # A comment opens at the start of a line. `<!--` inside a code span is
       # prose, and treating it as an opener would hide the rest of the file.
       nocode = $0; gsub(/`[^`]*`/, "", nocode)
-      if (!infence && nocode ~ /^[ \t]*<!--/ && nocode !~ /-->/) { incomment = 1; next }
+      if (!infence && nocode ~ /^[ \t]*<!--/ && nocode !~ /-->/) { incomment = 1; incom = 1; next }
 
       # Fences close only on the same character, at least as long. An opener
       # whose info string holds a backtick is inline code, not a fence.
@@ -155,7 +169,7 @@ doc_facts() {
         }
       }
 
-      if (marker($0) && prose(above)) { glued++; printf "@glued_at\t%d\n", NR }
+      if (!abovecom && glued_to(above, $0)) { glued++; printf "@glued_at\t%d\n", NR }
       if (title == "" && $0 ~ /^# /) title = substr($0, 3)
       if (legacy == "" && $0 ~ /^> \*\*Status\*\*:/) {
         legacy = $0; sub(/^> \*\*Status\*\*:[ \t]*/, "", legacy)
