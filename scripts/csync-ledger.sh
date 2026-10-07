@@ -6,6 +6,7 @@
 #   csync-ledger.sh docs         docs/design and docs/archive, one entry each
 #   csync-ledger.sh gauges       every file that declares a gauge, against it
 #   csync-ledger.sh resolve SLUG the file a [[slug]] names, or its closed line
+#   csync-ledger.sh glued        every marker line Markdown joins to the line above
 #
 # It replaces a hand-kept GRAPH.md. An index a session maintains is an index
 # that goes stale -- a marker left behind after its findings were folded, a
@@ -41,6 +42,7 @@ ROOT="$(csync_project_root "$PWD")" || {
   exit 1
 }
 W="$ROOT/$WS"
+TEMPLATES="$HERE/../templates/workspace"
 
 # Frontmatter and body facts of one document, as `key<TAB>value` lines.
 #
@@ -63,6 +65,9 @@ W="$ROOT/$WS"
 #   @untokened     `##` headings with no `(...)` token at the end
 #   @item          one per backlog item line (`- ` at column 0)
 #   @undated       backlog items that do not open with YYYYMMDD
+#   @glued_at      one per line that opens with a marker straight under a line
+#                  of prose -- Markdown joins it to that paragraph
+#   @glued         how many
 #
 # Only the subset of YAML the format allows is understood: keys at column 0,
 # prose as literal block scalars. Headings inside fenced code and HTML comments
@@ -70,6 +75,21 @@ W="$ROOT/$WS"
 doc_facts() {
   awk '
     function emit(k, v) { if (!(k in seen)) { seen[k] = 1; printf "%s\t%s\n", k, v } }
+    # A line Markdown would carry on as paragraph text. Headings, tables,
+    # quotes, fences, comments and rules start or end blocks of their own.
+    function prose(s) {
+      sub(/^[ \t]+/, "", s); sub(/[ \t]+$/, "", s)
+      if (s == "" || s ~ /^(#|\||>|<!--|```|~~~)/ || s ~ /-->$/) return 0
+      return s !~ /^(---+|\*\*\*+|___+)$/
+    }
+    # The closed vocabulary in document-format.md. Bytes, not characters:
+    # the pictographs are matched without their variation selector.
+    function marker(s) {
+      sub(/^[ \t]+/, "", s)
+      return index(s, "📌") == 1 || index(s, "⚠") == 1 || index(s, "✅") == 1 ||
+             index(s, "🔁") == 1 || index(s, "🗑") == 1 || index(s, "★") == 1 ||
+             index(s, "🔓") == 1 || index(s, "🔗") == 1
+    }
     function flush() {
       if (key != "") {
         if (mode == "block") emit(key, cur)
@@ -79,7 +99,8 @@ doc_facts() {
     }
     BEGIN { state = "start"; fm = 0; title = ""; nfind = -1; infind = 0
             blocks = 0; odd2 = 0; odd3 = 0; pend3 = 0; undh3 = 0; legacy = ""
-            judg = 0; untok = 0; undated = 0; infence = 0; incomment = 0; lind = -1 }
+            judg = 0; untok = 0; undated = 0; infence = 0; incomment = 0; lind = -1
+            glued = 0; prevl = "" }
     { sub(/\r$/, "") }
     NR == 1 { sub(/^\357\273\277/, "") }
     state == "start" {
@@ -112,6 +133,7 @@ doc_facts() {
       next
     }
     state == "body" {
+      above = prevl; prevl = $0
       # Comments first: a fence marker inside a comment is not a fence.
       if (incomment) { if ($0 ~ /-->/) incomment = 0; next }
       # A comment opens at the start of a line. `<!--` inside a code span is
@@ -133,6 +155,7 @@ doc_facts() {
         }
       }
 
+      if (marker($0) && prose(above)) { glued++; printf "@glued_at\t%d\n", NR }
       if (title == "" && $0 ~ /^# /) title = substr($0, 3)
       if (legacy == "" && $0 ~ /^> \*\*Status\*\*:/) {
         legacy = $0; sub(/^> \*\*Status\*\*:[ \t]*/, "", legacy)
@@ -170,6 +193,7 @@ doc_facts() {
       printf "@findings\t%d\n@findings_blocks\t%d\n@findings_odd\t%d\n", nfind, blocks, odd
       printf "@findings_undated\t%d\n@legacy_status\t%s\n", undh3, legacy
       printf "@judgment\t%d\n@untokened\t%d\n@undated\t%d\n", judg, untok, undated
+      printf "@glued\t%d\n", glued
     }
   ' "$1"
 }
@@ -418,6 +442,7 @@ show_backlog() {
   printf '%s\n' "$facts" | awk -F '\t' '$1 == "@item" { sub(/^[^\t]*\t/, ""); print "  " $0 }'
   undated="$(fact "$facts" @undated)"
   [ "${undated:-0}" -gt 0 ] && anomaly "backlog.md: $undated item(s) without a YYYYMMDD date -- cleanup stamps them"
+  [ "$KIND_STATE" = ok ] && header_drift "$f" backlog.md '^(## |- )'
   return 0
 }
 
@@ -439,14 +464,16 @@ scan_shape() {
         [ "$KIND_STATE" = unknown ] && continue
         [ -n "$(fact "$facts" gauge)" ] || anomaly "notes/decisions.md has no \`gauge\` key"
         [ "$(fact "$facts" @judgment)" -gt 0 ] 2>/dev/null &&
-          anomaly "notes/decisions.md holds $(fact "$facts" @judgment) \`judgment\` entr(y/ies) -- they belong in notes/knowledge.md (cleanup)" ;;
+          anomaly "notes/decisions.md holds $(fact "$facts" @judgment) \`judgment\` entr(y/ies) -- they belong in notes/knowledge.md (cleanup)"
+        [ "$KIND_STATE" = ok ] && header_drift "$f" notes/decisions.md '^## ' ;;
       knowledge.md)
         facts="$(doc_facts "$f")"
         check_kind "$f" note/2 "$facts"
         [ "$KIND_STATE" = unknown ] && continue
         [ -n "$(fact "$facts" gauge)" ] || anomaly "notes/knowledge.md has no \`gauge\` key"
         [ "$(fact "$facts" @untokened)" -gt 0 ] 2>/dev/null &&
-          anomaly "notes/knowledge.md: $(fact "$facts" @untokened) entr(y/ies) with no kind token (deviating) -- cleanup marks them" ;;
+          anomaly "notes/knowledge.md: $(fact "$facts" @untokened) entr(y/ies) with no kind token (deviating) -- cleanup marks them"
+        [ "$KIND_STATE" = ok ] && header_drift "$f" notes/knowledge.md '^## ' ;;
       traps.md) ;;
       *) anomaly "unexpected file in notes/: $name" ;;
     esac
@@ -481,6 +508,101 @@ EOF
     fi
   fi
   return 0
+}
+
+# The prose a template puts above a file's first entry: from the end of the
+# frontmatter up to the first line matching $2, blank lines at either end
+# trimmed. The frontmatter is the workspace's own -- markers in its language, a
+# gauge it may have raised -- so it is never part of the comparison.
+header_of() {
+  awk -v stop="$2" '
+    { sub(/\r$/, "") }
+    NR == 1 && $0 == "---" { fm = 1; next }
+    fm { if ($0 == "---") fm = 0; next }
+    $0 ~ stop { exit }
+    { buf[++n] = $0 }
+    END {
+      s = 1; while (s <= n && buf[s] ~ /^[ \t]*$/) s++
+      e = n; while (e >= s && buf[e] ~ /^[ \t]*$/) e--
+      for (i = s; i <= e; i++) print buf[i]
+    }' "$1"
+}
+
+# That prose is the skill's, copied in when the file was created. Nothing
+# brings a later template into an existing workspace but cleanup, and cleanup
+# starts from this list -- so a copy that differs is reported here or never.
+header_drift() {
+  local file="$1" tmpl="$TEMPLATES/$2"
+  if [ ! -e "$tmpl" ]; then
+    anomaly "template $2 not found beside this script -- $(rel "$file") not compared"
+    return 0
+  fi
+  cmp -s <(header_of "$file" "$3") <(header_of "$tmpl" "$3") ||
+    anomaly "$(rel "$file"): the prose above the first entry differs from its template -- cleanup rewrites it"
+}
+
+# The workspace CLAUDE.md opens with a title and a description that are this
+# project's own, and may end with facts such as `## LSP`. What sits between is
+# the template's, rendered with this project's name -- that block has to be
+# there, verbatim and in one piece.
+claude_md_drift() {
+  local f="$W/CLAUDE.md" tmpl="$TEMPLATES/CLAUDE.md" name
+  [ -e "$f" ] || return 0
+  if [ ! -e "$tmpl" ]; then
+    anomaly "template CLAUDE.md not found beside this script -- CLAUDE.md not compared"
+    return 0
+  fi
+  name="$(git -C "$W" symbolic-ref --short HEAD 2>/dev/null)"
+  case "$name" in
+    prj/?*) name="${name#prj/}" ;;
+    *) anomaly "CLAUDE.md not compared with its template: no prj/<name> branch checked out"; return 0 ;;
+  esac
+  awk -v ws="$WS" -v name="$name" '
+    # Literal substitution: a name is not a regex replacement.
+    function fill(s, k, v,   i, out) {
+      out = ""
+      while ((i = index(s, k)) > 0) { out = out substr(s, 1, i - 1) v; s = substr(s, i + length(k)) }
+      return out s
+    }
+    { sub(/\r$/, "") }
+    FNR == NR {
+      if (on) { t = fill(fill($0, "{{WS}}", ws), "{{NAME}}", name); if (n || t !~ /^[ \t]*$/) blk[++n] = t }
+      if (index($0, "{{DESCRIPTION}}")) on = 1
+      next
+    }
+    { doc[++m] = $0 }
+    END {
+      while (n > 0 && blk[n] ~ /^[ \t]*$/) n--
+      for (i = 1; i + n - 1 <= m; i++) {
+        for (k = 1; k <= n && doc[i + k - 1] == blk[k]; k++) ;
+        if (k > n) exit 0
+      }
+      exit 1
+    }' "$tmpl" "$f" ||
+    anomaly "CLAUDE.md: the part below the description differs from its template -- cleanup re-renders it"
+}
+
+# Markers on a line straight under prose render mid-paragraph, and a run of
+# them as one block (document-format.md, "Emoji markers"). One summary line:
+# a workspace written before the rule can hold dozens, and a line per file
+# would bury everything else in this list. `glued` names them.
+glued_lines() {
+  local f
+  while IFS= read -r f; do
+    [ -n "$f" ] || continue
+    doc_facts "$f" | awk -F '\t' -v r="$(rel "$f")" '$1 == "@glued_at" { print r ":" $2 }'
+  done <<EOF
+$(find "$W" -name .git -prune -o -type f -name '*.md' -print 2>/dev/null | sort)
+EOF
+}
+
+scan_glued() {
+  local hits n files
+  hits="$(glued_lines)"
+  [ -n "$hits" ] || return 0
+  n="$(printf '%s\n' "$hits" | wc -l | tr -d ' ')"
+  files="$(printf '%s\n' "$hits" | sed 's/:[0-9]*$//' | sort -u | wc -l | tr -d ' ')"
+  anomaly "$n marker line(s) in $files file(s) sit straight under prose and render mid-paragraph -- cleanup separates them; \`csync-ledger.sh glued\` lists them"
 }
 
 show_anomalies() {
@@ -614,13 +736,16 @@ case "${1:-}" in
     show_plans
     show_backlog
     scan_shape
+    claude_md_drift
+    scan_glued
     show_anomalies ;;
   docs)    show_docs ;;
   gauges)  echo "gauges: $ROOT/$WS"; old_shape_banner; show_gauges ;;
+  glued)   glued_lines ;;
   resolve)
     [ -n "${2:-}" ] || { echo "usage: csync-ledger.sh resolve <slug>" >&2; exit 64; }
     resolve_slug "$2"; exit $? ;;
   *)
-    echo "usage: csync-ledger.sh [docs | gauges | resolve <slug>]" >&2
+    echo "usage: csync-ledger.sh [docs | gauges | glued | resolve <slug>]" >&2
     exit 64 ;;
 esac

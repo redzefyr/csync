@@ -109,7 +109,7 @@ piles up in the old place again.
    `install.sh` has no rules link to fall back on
 
 **Without both, cleanup stops here and writes nothing** — not the migration, not
-steps 1–8, which distribute into and prune files that do not exist yet in the new
+steps 1–9, which distribute into and prune files that do not exist yet in the new
 shape. Say what is waiting and for whom. A half-migrated workspace is the one both
 versions misread.
 
@@ -123,7 +123,8 @@ old shape it can decide from the tree. Beyond that list: hand-off notes and
 session logs in `notes/`, and a workspace `CLAUDE.md` carrying copies of the rules.
 
 ⚠️ **Copy a template only where the file does not exist.** Where it does, merge
-into it — never copy over it.
+into it — never copy over it. The prose a template puts above the first entry is
+the one part that is replaced, in step 8.
 
 **Work in this order.** The `OLD SHAPE` reasons print in it too; every reason the
 banner lists is cleared by one of these steps.
@@ -245,7 +246,28 @@ live entry to meet the max** — when nothing is left that can move, ask the use
 raise it, with the line count and the value proposed. Session notes recording only
 what happened get discarded; anything recording a trap does not.
 
-**8. Run `csync-ledger.sh` again, and `csync-ledger.sh gauges`.** **No `OLD SHAPE`
+**8. Bring what was copied from a template up to date.** A template is copied once,
+when its file is created, and nothing else carries a later version into a
+workspace. The ledger names each copy that has fallen behind:
+
+- **the prose above the first entry** in `notes/decisions.md`, `notes/knowledge.md`
+  and `backlog.md` → replace it with the template's, from the title down to the
+  first entry. The frontmatter stays: its markers are in this workspace's language
+  and its gauge may have been raised. ⚠️ **Older wording is what you expect to
+  find; something about this project is not — that is an entry written in the
+  wrong place.** Show it to the
+  user and ask where it goes before replacing anything — a rule there may be
+  theirs, and replacing the prose is the one step that would delete it unread
+- **the workspace `CLAUDE.md`** → re-render the part below the description from
+  the template, with this project's name. The title, the description and project
+  facts such as `## LSP` stay
+- **marker lines straight under prose** — `csync-ledger.sh glued` lists them →
+  a blank line before each; inside a list item, the line keeps its indentation.
+  Spacing only: the line itself does not change
+
+All three go in the migration column.
+
+**9. Run `csync-ledger.sh` again, and `csync-ledger.sh gauges`.** **No `OLD SHAPE`
 line may remain** — while it prints, the workspace takes no writes. The "out of
 shape" list should be empty or explained, and every gauged file under its max **or
 raised with the user's yes**. A backlog past its max is proposed to the user, not pruned
