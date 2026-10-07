@@ -42,3 +42,5 @@ count and the value proposed. **Never trim to fit.**
 One flat list of `##` entries. Copy
 `~/.claude/skills/csync/templates/document/note-judgment-entry.md` or
 `note-trap-entry.md` beside it.
+
+<!-- END OF DOCUMENT RULES -->

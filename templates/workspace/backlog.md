@@ -12,3 +12,5 @@ propose dropping, wait. After writing, run
 never promote or drop alone. Rules:
 `~/.claude/skills/csync/references/workspace.md` ("The backlog").
 
+<!-- END OF DOCUMENT RULES -->
+

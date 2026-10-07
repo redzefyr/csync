@@ -79,6 +79,34 @@ that is what a session reads. The value lives in the file it governs so it is in
 context whenever that file is, and so a project can move it without touching a
 copy anywhere else. What happens past each is `workspace.md`'s ("Gauges").
 
+**7. A file whose template carries rules — `notes/decisions.md`,
+`notes/knowledge.md`, `backlog.md` — closes them with this line:**
+
+```
+<!-- END OF DOCUMENT RULES -->
+```
+
+The rules run from below the `#` title to that line, and entries go below it. The
+block is the skill's, the template's text verbatim — the frontmatter is not part
+of it — and `cleanup` brings it up to date. **A viewer may fold it**; Claude reads
+it as written. It is plain prose on purpose, not a comment, so it weighs what any
+other line in the file weighs.
+
+⚠️ **The line is exact, alone on its line at column 0, and appears once.** Write
+nothing above it but the rules, and never remove it.
+
+**A viewer folds only when all of these hold**, and otherwise shows the file
+whole — folding anyway would hide whatever sits in the block:
+
+- the line appears **exactly once** outside fenced code and HTML comments — a
+  quotation of it inside either is text, not the marker. A trailing `\r` is a
+  line ending; any other trailing character is a mismatch
+- a `#` title comes **before** it
+- **no entry** comes before it: no `## ` heading, and in `backlog.md` no `- `
+  line at column 0
+
+`csync-ledger.sh` reports each of these failing, by name, and counts the same way.
+
 ## `plan/1`
 
 ```yaml

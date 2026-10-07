@@ -39,3 +39,5 @@ reported this session, tell the user and leave the choice to them.
 
 One flat list of `##` entries. Copy
 `~/.claude/skills/csync/templates/document/note-decision-entry.md`.
+
+<!-- END OF DOCUMENT RULES -->

@@ -43,6 +43,8 @@ ROOT="$(csync_project_root "$PWD")" || {
 }
 W="$ROOT/$WS"
 TEMPLATES="$HERE/../templates/workspace"
+# Closes the rules a template puts in a file (document-format.md, rule 7).
+RULES_END='<!-- END OF DOCUMENT RULES -->'
 
 # Frontmatter and body facts of one document, as `key<TAB>value` lines.
 #
@@ -53,6 +55,13 @@ TEMPLATES="$HERE/../templates/workspace"
 #   @fm            1 when the file opens with `---`, else 0
 #   @fm_unclosed   1 when that frontmatter never closes
 #   @title         the first `# ` heading after the frontmatter
+#   @title_at      its line number, 0 with none
+#   @rules_end     lines that are exactly $RULES_END, outside fences and
+#                  comments -- inside one it is code or comment text, not the
+#                  marker, and a CommonMark tree agrees
+#   @rules_end_at  the first of them, 0 with none
+#   @h2_at         the first `## ` heading, 0 with none
+#   @item_at       the first `- ` line at column 0, 0 with none
 #   @findings      dated `###` entries under `## findings`; -1 with no block
 #   @findings_blocks  how many exact `## findings` headings there are
 #   @findings_odd  headings that say findings in any other shape
@@ -73,7 +82,7 @@ TEMPLATES="$HERE/../templates/workspace"
 # prose as literal block scalars. Headings inside fenced code and HTML comments
 # are not headings. Anything else is reported by the caller, never guessed at.
 doc_facts() {
-  awk '
+  awk -v rend="$RULES_END" '
     function emit(k, v) { if (!(k in seen)) { seen[k] = 1; printf "%s\t%s\n", k, v } }
     # A line Markdown would carry on as paragraph text. Headings, tables,
     # fences, comments and rules start or end blocks of their own. A quoted
@@ -114,7 +123,8 @@ doc_facts() {
     BEGIN { state = "start"; fm = 0; title = ""; nfind = -1; infind = 0
             blocks = 0; odd2 = 0; odd3 = 0; pend3 = 0; undh3 = 0; legacy = ""
             judg = 0; untok = 0; undated = 0; infence = 0; incomment = 0; lind = -1
-            glued = 0; prevl = ""; incom = 0 }
+            glued = 0; prevl = ""; incom = 0
+            titleat = 0; nend = 0; endat = 0; h2at = 0; itemat = 0 }
     { sub(/\r$/, "") }
     NR == 1 { sub(/^\357\273\277/, "") }
     state == "start" {
@@ -170,7 +180,10 @@ doc_facts() {
       }
 
       if (!abovecom && glued_to(above, $0)) { glued++; printf "@glued_at\t%d\n", NR }
-      if (title == "" && $0 ~ /^# /) title = substr($0, 3)
+      if (title == "" && $0 ~ /^# /) { title = substr($0, 3); titleat = NR }
+      if ($0 == rend) { nend++; if (!endat) endat = NR }
+      if (!h2at && $0 ~ /^## /) h2at = NR
+      if (!itemat && $0 ~ /^- /) itemat = NR
       if (legacy == "" && $0 ~ /^> \*\*Status\*\*:/) {
         legacy = $0; sub(/^> \*\*Status\*\*:[ \t]*/, "", legacy)
       }
@@ -208,6 +221,8 @@ doc_facts() {
       printf "@findings_undated\t%d\n@legacy_status\t%s\n", undh3, legacy
       printf "@judgment\t%d\n@untokened\t%d\n@undated\t%d\n", judg, untok, undated
       printf "@glued\t%d\n", glued
+      printf "@title_at\t%d\n@rules_end\t%d\n@rules_end_at\t%d\n", titleat, nend, endat
+      printf "@h2_at\t%d\n@item_at\t%d\n", h2at, itemat
     }
   ' "$1"
 }
@@ -456,7 +471,7 @@ show_backlog() {
   printf '%s\n' "$facts" | awk -F '\t' '$1 == "@item" { sub(/^[^\t]*\t/, ""); print "  " $0 }'
   undated="$(fact "$facts" @undated)"
   [ "${undated:-0}" -gt 0 ] && anomaly "backlog.md: $undated item(s) without a YYYYMMDD date -- cleanup stamps them"
-  [ "$KIND_STATE" = ok ] && header_drift "$f" backlog.md '^(## |- )'
+  [ "$KIND_STATE" = ok ] && header_drift "$f" backlog.md '^(## |- )' "$facts"
   return 0
 }
 
@@ -479,7 +494,7 @@ scan_shape() {
         [ -n "$(fact "$facts" gauge)" ] || anomaly "notes/decisions.md has no \`gauge\` key"
         [ "$(fact "$facts" @judgment)" -gt 0 ] 2>/dev/null &&
           anomaly "notes/decisions.md holds $(fact "$facts" @judgment) \`judgment\` entr(y/ies) -- they belong in notes/knowledge.md (cleanup)"
-        [ "$KIND_STATE" = ok ] && header_drift "$f" notes/decisions.md '^## ' ;;
+        [ "$KIND_STATE" = ok ] && header_drift "$f" notes/decisions.md '^## ' "$facts" ;;
       knowledge.md)
         facts="$(doc_facts "$f")"
         check_kind "$f" note/2 "$facts"
@@ -487,7 +502,7 @@ scan_shape() {
         [ -n "$(fact "$facts" gauge)" ] || anomaly "notes/knowledge.md has no \`gauge\` key"
         [ "$(fact "$facts" @untokened)" -gt 0 ] 2>/dev/null &&
           anomaly "notes/knowledge.md: $(fact "$facts" @untokened) entr(y/ies) with no kind token (deviating) -- cleanup marks them"
-        [ "$KIND_STATE" = ok ] && header_drift "$f" notes/knowledge.md '^## ' ;;
+        [ "$KIND_STATE" = ok ] && header_drift "$f" notes/knowledge.md '^## ' "$facts" ;;
       traps.md) ;;
       *) anomaly "unexpected file in notes/: $name" ;;
     esac
@@ -551,8 +566,36 @@ header_drift() {
     anomaly "template $2 not found beside this script -- $(rel "$file") not compared"
     return 0
   fi
+  awk -v m="$RULES_END" '$0 == m { f = 1 } END { exit !f }' "$tmpl" &&
+    rules_end_check "$file" "$4" "$2"
   cmp -s <(header_of "$file" "$3") <(header_of "$tmpl" "$3") ||
-    anomaly "$(rel "$file"): the prose above the first entry differs from its template -- cleanup rewrites it"
+    anomaly "$(rel "$file"): the rules above the first entry differ from its template -- cleanup rewrites them"
+}
+
+# The rules block runs from below the `#` title through $RULES_END, and a
+# viewer may fold it (document-format.md, rule 7). It folds only when all of
+# these hold, so each failure is named: a viewer that folded anyway would hide
+# whatever sits in the block, entries included.
+rules_end_check() {
+  local file="$1" facts="$2" n at t e i
+  n="$(fact "$facts" @rules_end)"
+  if [ "${n:-0}" != 1 ]; then
+    anomaly "$(rel "$file"): \`$RULES_END\` appears ${n:-0} time(s) outside code and comments, not once -- a viewer does not fold the rules (document-format.md, rule 7); cleanup restores it"
+    return 0
+  fi
+  at="$(fact "$facts" @rules_end_at)"; t="$(fact "$facts" @title_at)"
+  if [ "${t:-0}" -eq 0 ] || [ "$t" -gt "$at" ]; then
+    anomaly "$(rel "$file"): no \`#\` title above \`$RULES_END\` -- a viewer does not fold the rules (rule 7)"
+  fi
+  e="$(fact "$facts" @h2_at)"
+  # In backlog.md a column-0 `- ` line is an entry too; in notes it is prose.
+  if [ "$3" = backlog.md ]; then
+    i="$(fact "$facts" @item_at)"
+    if [ "${i:-0}" -gt 0 ] && { [ "${e:-0}" -eq 0 ] || [ "$i" -lt "$e" ]; }; then e="$i"; fi
+  fi
+  if [ "${e:-0}" -gt 0 ] && [ "$e" -lt "$at" ]; then
+    anomaly "$(rel "$file"): an entry sits above \`$RULES_END\` -- a viewer does not fold the rules, or it would hide the entry (rule 7); cleanup moves it below"
+  fi
 }
 
 # The workspace CLAUDE.md opens with a title and a description that are this
