@@ -195,8 +195,9 @@ subsections is a `docs/` document with a one-line note pointing at it.
 
 **Every heading ends in a token in parentheses.** In `decisions`,
 `(<YYYY-MM-DD> · <authority>)`. In `knowledge`, `(<YYYY-MM-DD> · <kind>)` — or
-`(<kind>)` alone for a trap migrated from `note/1`, which carried no date:
-⚠️ **a date is never invented to fill the slot.**
+`(<kind>)` alone for a trap migrated from `note/1`, which carried no date.
+
+⚠️ **A date is never invented to fill the slot.**
 
 **A `decisions` entry, and a `knowledge` entry marked `judgment`, must contain a
 paragraph opening with `why_marker` in bold.** That is what makes "a decision
@@ -310,6 +311,10 @@ findings, so every existing hand-off would go silently missing.
 
 - a marker sits at the **start of a paragraph or list item** and applies to that
   paragraph. Mid-sentence it is just an emoji
+- ⚠️ **a new line is not a new paragraph.** Markdown joins a line to the prose
+  directly above it, so a marker under an unbroken line renders mid-paragraph,
+  and a run of them renders as one block. Put a blank line before it — inside a
+  list item, a blank line and then the item's indentation
 - **the set is closed.** Any other emoji is decoration and carries no meaning a
   tool may act on
 

@@ -25,6 +25,7 @@ by the values declared as `entry_markers` above:
 
 **Two tests decide entry, and an entry needs both**: would starting work without
 knowing this make you wrong? · where is the reader standing when it fires?
+
 ⚠️ **Inside one routine, type or interface, the home is a comment at that code
 site, not here** — this file is read at session start, before anyone knows which
 files the session touches.

@@ -160,6 +160,7 @@ prose version **in the words of the session that did the work.** Copy
   lookups do not count. A session that has opened several projects may advance one
   pipeline **in each** — cross-repo pairs exist, and the side that goes second
   would otherwise start without the context the first just built.
+
   ⚠️ **Not licence to open more projects in order to get more pipelines.**
 - **A session ends by updating that plan** — the three steps under "Session end"
 
@@ -169,6 +170,7 @@ While running one pipeline you often find **something another pipeline needs to
 know**, and the one-per-session rule means you cannot go and fix it there. **Put
 it in the other plan as a `## findings` block**, copied from
 `~/.claude/skills/csync/templates/document/findings-entry.md`.
+
 ⚠️ **The position is exact** — a block in
 any other shape reports **zero pending findings**, which is read as "nothing
 waiting"; `document-format.md` has the shape.
@@ -201,6 +203,7 @@ meets it and decides it again.
 with no entries under it is counted as `?`, a hand-off in a shape nothing can
 read. **The prose under the heading and the `KEEP THIS COMMENT` comment travel with
 the block**, because it lands in a plan whose session may never load this file.
+
 ⚠️ Copies written before `GRAPH.md` was retired tell the folder to backlog into
 `GRAPH.md`; that means `backlog.md`.
 
@@ -215,6 +218,7 @@ premise** — that one is immediate, regardless of count.
 >  waiting, and one of them touches that plan's premise."
 
 **Do not handle it in this session**; whether to open it is the user's call.
+
 ⚠️ **Do not invent a numeric threshold** — those two conditions are the test.
 
 ## `notes/` — what goes into context every session
@@ -301,6 +305,7 @@ is not written in English.
   reads. Treat it as a `mandate`, and settle it **the first time it is actually in
   the way**: say it is `held`, say which way you read it and why, and agree it with
   the user — settled as Claude's, it moves to `knowledge.md` as a `judgment`.
+
   ⚠️ **Not a migration to run through the file** — a bulk pass would have you
   guessing at exactly the thing the marker exists to stop you guessing at
 - **`judgment`** (`knowledge.md`) — Claude concluded it. **Revise it without asking
@@ -488,6 +493,7 @@ backlog line gets done twice or not at all.
 ⚠️ **The backlog is not a second `plans/`.** An item that has sat there through
 several cleanups without being done or promoted — its date says how long — is one
 nobody intends to do, and leaving it there funds the appearance of a tracked queue.
+
 ⚠️ **Say so and propose dropping it — name the item, then wait**, exactly as with
 promotion and for the same reason: **neither way out of the backlog while the work
 is still undone is a session's to take alone.** Deleting the line of an item you

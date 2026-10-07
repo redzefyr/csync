@@ -464,6 +464,7 @@ fast-forward-only branch, and a stale copy is the original problem back.
 
 What was given up is an explicit "leading pipeline" order — now status, then most
 recently advanced — and free prose under an index entry, which belongs in the plan.
+
 ⚠️ **The migration has an order**: a machine still on an older skill reads a
 missing `GRAPH.md` as the old shape and recreates it, so every machine updates
 first.

@@ -510,6 +510,7 @@ wiring is removed.
   on, and how to write a `bin/` wrapper once the user has approved one. **Read it
   when one of those is actually happening**, not to mention that it exists.
 - `references/rationale.md` — the incidents the two workspace files came out of.
+
   ⚠️ **Not read to do work.** Read it only when a rule in one of them is being
   changed, or when the user asks why a rule exists. Keeping those reasons inline
   is what turned every session into a reader of several hundred lines of incident

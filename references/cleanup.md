@@ -85,6 +85,7 @@ avoid, never how this session came to find it.
 
 Deletion is safe here: the workspace is a git clone, so anything removed stays in
 `prj/<name>` history. Say so when you report, and give the branch name.
+
 ⚠️ **"Safe to delete" is not "free to read back"** — recovering something from that
 history needs the user's approval twice, once to read and once to apply (**Two
 repos** in `SKILL.md`).
