@@ -77,6 +77,12 @@ RULES_END='<!-- END OF DOCUMENT RULES -->'
 #   @glued_at      one per line that opens with a marker straight under a line
 #                  of prose -- Markdown joins it to that paragraph
 #   @glued         how many
+#   @stages        plan stages: `##` headings other than findings and 📌
+#   @stages_done   of those, closed -- marked ✅ or 🗑️
+#   @stages_wip    of those, marked 🚧
+#   @stage_now     the title of the first 🚧 stage, marker stripped
+#   @stages_misplaced  `##` headings with a heading marker anywhere but first
+#   @stages_unfolded   closed stages with more than one non-blank body line
 #
 # Only the subset of YAML the format allows is understood: keys at column 0,
 # prose as literal block scalars. Headings inside fenced code and HTML comments
@@ -100,8 +106,11 @@ doc_facts() {
       sub(/^[ \t]+/, "", s)
       return index(s, "📌") == 1 || index(s, "⚠") == 1 || index(s, "✅") == 1 ||
              index(s, "🔁") == 1 || index(s, "🗑") == 1 || index(s, "★") == 1 ||
-             index(s, "🔓") == 1 || index(s, "🔗") == 1
+             index(s, "🔓") == 1 || index(s, "🔗") == 1 || index(s, "🚧") == 1
     }
+    # A closed stage is folded when one line stands under it. Called where the
+    # stage ends -- the next h1 or h2, or the end of the file.
+    function close_stage() { if (indone && donebody > 1) unfolded++; indone = 0; donebody = 0 }
     # A marker line joined to the paragraph above. A quoted marker line is
     # inside the quote, so the line above has to be in it too -- a `>` under
     # unquoted prose opens a quote of its own. Peel one level from each and
@@ -124,7 +133,9 @@ doc_facts() {
             blocks = 0; odd2 = 0; odd3 = 0; pend3 = 0; undh3 = 0; legacy = ""
             judg = 0; untok = 0; undated = 0; infence = 0; incomment = 0; lind = -1
             glued = 0; prevl = ""; incom = 0
-            titleat = 0; nend = 0; endat = 0; h2at = 0; itemat = 0 }
+            titleat = 0; nend = 0; endat = 0; h2at = 0; itemat = 0
+            nstage = 0; sdone = 0; swip = 0; snow = ""; smis = 0; unfolded = 0
+            indone = 0; donebody = 0 }
     { sub(/\r$/, "") }
     NR == 1 { sub(/^\357\273\277/, "") }
     state == "start" {
@@ -164,6 +175,8 @@ doc_facts() {
       # prose, and treating it as an opener would hide the rest of the file.
       nocode = $0; gsub(/`[^`]*`/, "", nocode)
       if (!infence && nocode ~ /^[ \t]*<!--/ && nocode !~ /-->/) { incomment = 1; incom = 1; next }
+      # Everything under the heading of a closed stage is its body, fenced lines included.
+      if (indone && $0 ~ /[^ \t]/ && (infence || $0 !~ /^##? /)) donebody++
 
       # Fences close only on the same character, at least as long. An opener
       # whose info string holds a backtick is inline code, not a fence.
@@ -197,7 +210,20 @@ doc_facts() {
       if ($0 ~ /^## findings( |$)/) {
         blocks++; infind = 1; pend3 = 0; if (nfind < 0) nfind = 0; next
       }
-      if ($0 ~ /^# / || $0 ~ /^## /) { infind = 0; pend3 = 0 }
+      if ($0 ~ /^# / || $0 ~ /^## /) { infind = 0; pend3 = 0; close_stage() }
+      # A stage is any h2 but findings, in whatever shape findings is written,
+      # and a 📌 section, which is a premise rather than a stage.
+      if ($0 ~ /^## / && tolower($0) !~ /^##[ \t]*[^a-z0-9#]*findings([^a-z]|$)/) {
+        h = substr($0, 4); wip = 0; pin = 0
+        if (index(h, "✅") == 1) { sdone++; indone = 1; h = substr(h, 4) }
+        else if (index(h, "🗑") == 1) { sdone++; indone = 1; h = substr(h, 5) }
+        else if (index(h, "🚧") == 1) { swip++; wip = 1; h = substr(h, 5) }
+        else if (index(h, "📌") == 1) { pin = 1; h = substr(h, 5) }
+        if (!pin) nstage++
+        sub(/^\357\270\217/, "", h); sub(/^[ \t]+/, "", h)
+        if (index(h, "✅") || index(h, "🗑") || index(h, "🚧") || index(h, "📌")) smis++
+        if (wip && snow == "") snow = h
+      }
       # A findings heading in any other shape. At h2 it is always suspect. An
       # h3 counts only when dated entries follow it, since "### Findings" is
       # also an ordinary sub-heading in a report.
@@ -214,6 +240,7 @@ doc_facts() {
     END {
       unclosed = (state == "fm")
       if (unclosed) flush()
+      close_stage()
       odd = odd2 + (blocks == 0 ? odd3 : 0)
       printf "@fm\t%d\n@fm_unclosed\t%d\n@title\t%s\n", fm, unclosed, title
       printf "@hidden_tail\t%d\n", (infence || incomment) ? 1 : 0
@@ -223,6 +250,8 @@ doc_facts() {
       printf "@glued\t%d\n", glued
       printf "@title_at\t%d\n@rules_end\t%d\n@rules_end_at\t%d\n", titleat, nend, endat
       printf "@h2_at\t%d\n@item_at\t%d\n", h2at, itemat
+      printf "@stages\t%d\n@stages_done\t%d\n@stages_wip\t%d\n", nstage, sdone, swip
+      printf "@stage_now\t%s\n@stages_misplaced\t%d\n@stages_unfolded\t%d\n", snow, smis, unfolded
     }
   ' "$1"
 }
@@ -325,6 +354,8 @@ load_plan_facts() {
   F_fm=""; F_status=""; F_status_note=""; F_next=""; F_blocked=""; F_pairs=""
   F_legacy_status=""; F_findings=""; F_findings_odd=""; F_findings_blocks=""
   F_findings_undated=""; F_hidden_tail=""
+  F_stages=0; F_stages_done=0; F_stages_wip=0; F_stage_now=""
+  F_stages_misplaced=0; F_stages_unfolded=0
   local k v
   while IFS=$'\t' read -r k v; do
     case "$k" in
@@ -333,6 +364,9 @@ load_plan_facts() {
       @legacy_status) F_legacy_status="$v" ;; @findings) F_findings="$v" ;;
       @findings_odd) F_findings_odd="$v" ;; @findings_blocks) F_findings_blocks="$v" ;;
       @findings_undated) F_findings_undated="$v" ;; @hidden_tail) F_hidden_tail="$v" ;;
+      @stages) F_stages="$v" ;; @stages_done) F_stages_done="$v" ;;
+      @stages_wip) F_stages_wip="$v" ;; @stage_now) F_stage_now="$v" ;;
+      @stages_misplaced) F_stages_misplaced="$v" ;; @stages_unfolded) F_stages_unfolded="$v" ;;
     esac
   done <<EOF
 $1
@@ -355,7 +389,7 @@ plan_slug() {
 }
 
 show_plans() {
-  local f base advanced facts status note next blocked pairs findings rank slug odd row
+  local f base planned advanced facts status note next blocked pairs findings rank slug odd row
   local order="" n=0 i
   ROWS=()
 
@@ -368,12 +402,13 @@ show_plans() {
     slug="$(plan_slug "$base")"
     case "$base" in
       [0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]-?*)
-        advanced="${base:9:8}" ;;
+        planned="${base:0:8}"; advanced="${base:9:8}" ;;
       [0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]-[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]-?*)
+        planned="${base:0:10}"; planned="${planned//-/}"
         advanced="${base:11:10}"; advanced="${advanced//-/}"
         anomaly "dashed dates (legacy): $(rel "$f") -- renamed by cleanup" ;;
       *)
-        advanced="00000000"
+        planned="00000000"; advanced="00000000"
         anomaly "malformed plan filename: $(rel "$f") -- expected <planned>-<advanced>-<slug>.md" ;;
     esac
 
@@ -419,6 +454,16 @@ show_plans() {
       anomaly "findings heading in a shape nothing reads: $(rel "$f") -- counted as ?"
     [ "$F_findings_undated" -gt 0 ] 2>/dev/null &&
       anomaly "\`###\` inside a findings block that is not an entry: $(rel "$f")"
+    # Stage markers (document-format.md, "Stage markers"). Unmarked is a
+    # legitimate state -- not started -- so a plan with none is suspect only
+    # once it has moved: then some stage was worked on, and nothing says which.
+    [ "$F_stages_misplaced" -gt 0 ] &&
+      anomaly "stage marker not right after \`## \`: $(rel "$f") -- read as not started"
+    [ "$F_stages_unfolded" -gt 0 ] &&
+      anomaly "$F_stages_unfolded closed stage(s) not folded to one line: $(rel "$f") -- folded at session end, or by cleanup"
+    [ "$F_stages" -gt 0 ] && [ $((F_stages_done + F_stages_wip)) -eq 0 ] &&
+      [ "$advanced" \> "$planned" ] &&
+      anomaly "no stage marked although the plan has advanced: $(rel "$f") -- cleanup marks them"
 
     if [ "$advanced" = 00000000 ]; then row="$row      advanced ?"; else row="$row      advanced $advanced"; fi
     # A block with no dated entries, or a findings heading in any other shape,
@@ -432,7 +477,13 @@ show_plans() {
     fi
     case "$blocked" in ''|'0 items') ;; *) row="$row · blocked ${blocked% items}" ;; esac
     case "$pairs" in ''|'0 items') ;; *) row="$row · pairs ${pairs% items}" ;; esac
+    [ "$F_stages" -gt 0 ] && row="$row · stages $F_stages_done/$F_stages closed"
     row="$row"$'\n'
+    if [ "$F_stages_wip" -gt 0 ]; then
+      row="$row      in progress: $F_stage_now"
+      [ "$F_stages_wip" -gt 1 ] && row="$row (+$((F_stages_wip - 1)) more)"
+      row="$row"$'\n'
+    fi
     [ -n "$next" ] && row="$row      next: $next"$'\n'
 
     ROWS[$n]="$row"

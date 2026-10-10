@@ -184,6 +184,11 @@ Dropped: memory stayed flat only at batch sizes too small to use; see docs/archi
 - ✅ means what it means everywhere: **verified, not merely claimed**. A stage the
   session believes is done but has not checked stays 🚧
 
+The ledger shows `stages <closed>/<all> closed` and the first 🚧 stage's title on
+each plan. It reports a heading marker anywhere but first, a closed stage with more
+than one line under it, and a plan that has advanced with no stage marked —
+unmarked is a real state, so only a plan that has moved is suspect.
+
 ### `## findings` — exact in position
 
 ```markdown
@@ -341,7 +346,7 @@ flagging it would train people to ignore the report.
 ## `GRAPH.md` — retired
 
 There is no index file. `csync-ledger.sh` derives what `GRAPH.md` used to hold —
-plans with status, next step, findings count and pairs; the backlog; docs with
+plans with status, next step, findings count, pairs and stage progress; the backlog; docs with
 their titles and `revise_when`; slug resolution — from the documents themselves,
 each time it runs, and writes nothing.
 

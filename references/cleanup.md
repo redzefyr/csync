@@ -208,6 +208,17 @@ file split exists to record.
 not if it is mostly done. Check the actual state — grep the code, read the git log
 — rather than trusting what the document claims.
 
+**In each live plan, set the stage markers from that same check** (`document-format.md`,
+"Stage markers"). A plan from before the markers has none, and every stage reads
+as not started. Finished → fold it to one line under a ✅ heading · dropped → the
+same under 🗑️, the line saying why · started → 🚧 · untouched → unmarked ·
+premises → 📌 · a note on work not being done now → `backlog.md`. A marker
+already written after a number or at the end of the title moves to the front. The ledger names a plan that has advanced with no stage
+marked, a ✅ stage still carrying its body, and a marker anywhere but first.
+⚠️ **✅ needs the code to show it; where the evidence does not decide between
+🚧 and unmarked, ask** — a guessed marker reads as checked. Markers go in the
+migration column; the folded bodies go in the pruning column.
+
 **2. A finished plan goes with the file. Four things are the exception — take those
 out first.** In order of how often the loss bites:
 
