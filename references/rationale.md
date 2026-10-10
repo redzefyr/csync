@@ -325,6 +325,17 @@ struck through and their bodies still standing underneath. The rule named no
 moment, so no moment checked it. Session end is the moment because the session
 that closed the section is the only one that knows what its one line should say.
 
+### A stage's progress is marked on its heading
+
+**2026-10-11.** A plan's frontmatter says where the pipeline stands as a whole;
+nothing said which of its sections were started, finished or untouched, so a
+reader had to read every body to find out. The marker goes on the `##` heading
+because that is the line a reader scans. A folded stage now keeps its heading,
+with ✅, over its one line: what made struck-through headings a problem was the
+body still standing under them, and the fold still removes it. 🚧 is set when
+work on a stage starts rather than at session end, because session end is the
+step most often skipped, and a 🚧 written early stays true if the session stops.
+
 ### Closing a plan starts with verifying the code
 
 There is precedent for a plan marked "shipped" that described an abandoned branch

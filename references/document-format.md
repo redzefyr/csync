@@ -144,6 +144,46 @@ because a check only ever sees its own repo.
 **The body carries no header.** `status`, `next` and `blocked` are frontmatter and
 appear once. A body sentence that happens to read like a status is just a sentence.
 
+### Stage markers — on each `##` heading
+
+Each `##` section of a plan is a stage, and its heading says how far that stage got:
+
+```markdown
+## 📌 0. Premises carried over
+
+## ✅ 1. Schema frozen
+Frozen at v3; evidence in docs/archive/20260902-schema-freeze.md.
+
+## 🗑️ 2. Streaming import
+Dropped: memory stayed flat only at batch sizes too small to use; see docs/archive/20260905-streaming-import.md.
+
+## 🚧 3. Parser rebase
+
+## 4. Index rebuild
+```
+
+| heading | |
+|---|---|
+| `## <title>` | not started — no marker |
+| `## 🚧 <title>` | in progress — a session has started on it |
+| `## ✅ <title>` | done, and folded: the body under it is one line |
+| `## 🗑️ <title>` | dropped, and folded: the one line says why |
+| `## 📌 <title>` | **not a stage** — premises or facts the stages stand on. Not counted |
+
+- the marker comes **right after `## `, before any number or label** —
+  `## ✅ 2. Title`, never `## 2. ✅ Title` or `## 2. Title — ✅`. One place to
+  look is what makes the headings scannable
+- ✅ and 🗑️ both **close** a stage, and both fold it. A dropped stage keeps its
+  one line because "why it was rejected" is exactly what the next session would
+  otherwise re-derive
+- **a section that is neither a stage nor a premise does not belong here** — a
+  note on work not being done now is a backlog line
+- **`## findings` never takes one.** It is not a stage, and a decorated heading
+  is read as zero pending findings
+- a section promoted from a finding arrives **unmarked** — nobody has started it
+- ✅ means what it means everywhere: **verified, not merely claimed**. A stage the
+  session believes is done but has not checked stays 🚧
+
 ### `## findings` — exact in position
 
 ```markdown
@@ -331,6 +371,9 @@ findings, so every existing hand-off would go silently missing.
 | 📌 | **settled** — a decision or premise that holds, with its reason |
 | ⚠️ | **warning** — easy to get wrong; prefer the ones that fail silently |
 | ✅ | **done** — completed and verified, not merely claimed |
+| 🚧 | **in progress** — started, not finished. **Plan `##` headings only** ("Stage markers") |
+
+On a plan's `##` heading, ✅ 🗑️ 🚧 📌 mark the stage — "Stage markers" above.
 | 🔁 | **carried over** — the substance moved to another document or pipeline |
 | 🗑️ | **dropped** — abandoned; do not revive without new grounds |
 | ★ | **read this first** — the one line that survives if nothing else is read |
@@ -338,7 +381,8 @@ findings, so every existing hand-off would go silently missing.
 | 🔗 | **pair** — a cross-repository link |
 
 - a marker sits at the **start of a paragraph or list item** and applies to that
-  paragraph. Mid-sentence it is just an emoji
+  paragraph — or, in a plan, at the start of a `##` heading's text, where it
+  applies to that stage. Mid-sentence it is just an emoji
 - ⚠️ **a new line is not a new paragraph.** Markdown joins a line to the prose
   directly above it, so a marker under an unbroken line renders mid-paragraph,
   and a run of them renders as one block. Put a blank line before it — inside a

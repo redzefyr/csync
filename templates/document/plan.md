@@ -29,8 +29,17 @@ pairs: []
 
   Every prose value uses `|`.
 
-  Do not leave finished sections here. Keep a one-line conclusion and push the
-  evidence into docs/archive/.
+  Each `##` section is a stage; its heading carries the stage's marker:
+    ## <title>      not started
+    ## 🚧 <title>   in progress -- mark it when work on it starts
+    ## ✅ <title>   done and verified -- the body under it is one line
+    ## 🗑️ <title>   dropped -- the one line says why
+    ## 📌 <title>   not a stage: premises the stages stand on
+  The marker goes before any number: `## ✅ 2. Title`.
+  `## findings` never takes a marker.
+
+  Do not leave finished sections here. Keep a one-line conclusion under the
+  ✅ heading and push the evidence into docs/archive/.
 
   Rules: ~/.claude/skills/csync/references/document-format.md
 -->

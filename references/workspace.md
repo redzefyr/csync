@@ -154,8 +154,12 @@ Every plan opens with **YAML frontmatter** carrying `status`, `next` and
 prose version **in the words of the session that did the work.** Copy
 `~/.claude/skills/csync/templates/document/plan.md`.
 
-- **A plan holds no finished sections** — a one-line conclusion, evidence pushed
-  into `docs/archive/`. Folding them is a "Session end" step
+- **Each `##` section is a stage, and its heading carries the stage's marker** —
+  none for not started, 🚧 in progress, ✅ done, 🗑️ dropped, and 📌 for a premise
+  section that is not a stage (`document-format.md`, "Stage markers"). A reader
+  sees how far the plan got from the headings alone
+- **A plan holds no finished sections** — a ✅ heading over a one-line conclusion,
+  evidence pushed into `docs/archive/`. Folding them is a "Session end" step
 - **Advance one pipeline per project per session.** Cleanup, sync and simple
   lookups do not count. A session that has opened several projects may advance one
   pipeline **in each** — cross-repo pairs exist, and the side that goes second
@@ -536,7 +540,9 @@ elsewhere, fix it in that project, not in the one you happen to be sitting in.
    With no instruction, **ask which one to continue** — do not pick one yourself
 3. **If that plan has a `## findings` block, fold it in first** — promote, backlog
    or reject. Until they are folded the "next step" may be stale
-4. Run that one, and only that one
+4. Run that one, and only that one. **Mark a stage 🚧 when work on it starts** —
+   then, not at session end, so a session that stops early still leaves the
+   heading true
 
 `/csync open <slug>` is steps 2 and 3 as one command, and the only thing that
 renames the session (`SKILL.md`). The four steps stand on their own without it.
@@ -551,11 +557,14 @@ The pipeline you are running continues unchanged.
 1. **Update the plan's "next step."** A stale one is worse than none, because it
    reads as a step someone checked
 2. **Raise the advanced-date** — only if the pipeline actually moved
-3. **Fold every section this session closed into one line each.** This is the
-   moment that rule fires; left to "eventually", nothing checks it, and a closed
-   section left standing reads as work still on the table. ⚠️ **Striking a heading
-   through is not folding** — the heading, the strike and the body all go, and the
-   one-line conclusion stays
+3. **Fold every section this session closed into one line each, and mark its
+   heading ✅.** This is the moment that rule fires; left to "eventually", nothing
+   checks it, and a closed section left standing reads as work still on the
+   table. ⚠️ **A ✅ over the old body is not folding** — the body goes, the
+   one-line conclusion stays under the marked heading. Nor is striking the heading
+   through; ✅ is the only mark a finished stage gets. A stage started but not
+   finished keeps its 🚧; one this session gave up on is folded the same way under
+   🗑️, its one line saying why
 
 
 ## Closing a pipeline, and cleanup
