@@ -207,7 +207,11 @@ doc_facts() {
         if ($0 !~ /^- [0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9] /) undated++
       }
 
+      # Findings is an h2 like any other, so it closes the stage above it --
+      # before the `next`, or the entries of the block count as the body of
+      # that stage.
       if ($0 ~ /^## findings( |$)/) {
+        close_stage()
         blocks++; infind = 1; pend3 = 0; if (nfind < 0) nfind = 0; next
       }
       if ($0 ~ /^# / || $0 ~ /^## /) { infind = 0; pend3 = 0; close_stage() }
